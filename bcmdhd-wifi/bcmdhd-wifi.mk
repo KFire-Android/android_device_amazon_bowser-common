@@ -22,15 +22,15 @@ PRODUCT_PACKAGES += \
     libnetcmdiface
 
 PRODUCT_COPY_FILES += \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/firmware-$(TARGET_BOOTLOADER_BOARD_SUBTYPE).bin:system/vendor/firmware/fw_bcmdhd.bin \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/firmware-$(TARGET_BOOTLOADER_BOARD_SUBTYPE).bin:system/vendor/firmware/fw_bcmdhd_apsta.bin \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/firmware-$(TARGET_BOOTLOADER_BOARD_SUBTYPE).bin:system/vendor/firmware/fw_bcmdhd_p2p.bin \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_tate_usi.txt:system/etc/wifi/nvram_tate_usi.txt \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_tate_semco.txt:system/etc/wifi/nvram_tate_semco.txt \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem_semco.txt:system/etc/wifi/nvram_jem_semco.txt \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem_usi.txt:system/etc/wifi/nvram_jem_usi.txt \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem-wan_semco.txt:system/etc/wifi/nvram_jem-wan_semco.txt \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem-wan_usi.txt:system/etc/wifi/nvram_jem-wan_usi.txt \
-    $(COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram.txt:system/etc/wifi/bcmdhd.cal \
-    $(COMMON_FOLDER)/bcmdhd-wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/firmware-$(TARGET_BOOTLOADER_BOARD_SUBTYPE).bin:system/vendor/firmware/fw_bcmdhd.bin \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/firmware-$(TARGET_BOOTLOADER_BOARD_SUBTYPE).bin:system/vendor/firmware/fw_bcmdhd_apsta.bin \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/firmware-$(TARGET_BOOTLOADER_BOARD_SUBTYPE).bin:system/vendor/firmware/fw_bcmdhd_p2p.bin \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_tate_usi.txt:system/etc/wifi/nvram_tate_usi.txt \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_tate_semco.txt:system/etc/wifi/nvram_tate_semco.txt \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem_semco.txt:system/etc/wifi/nvram_jem_semco.txt \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem_usi.txt:system/etc/wifi/nvram_jem_usi.txt \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem-wan_semco.txt:system/etc/wifi/nvram_jem-wan_semco.txt \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram_jem-wan_usi.txt:system/etc/wifi/nvram_jem-wan_usi.txt \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/firmware/nvram.txt:system/etc/wifi/bcmdhd.cal \
+    $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
 

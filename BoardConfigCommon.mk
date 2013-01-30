@@ -18,7 +18,6 @@ USE_CAMERA_STUB := false
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_CMDLINE := mem=1G console=/dev/null rootdelay=2 init=/init androidboot.console=ttyO2 androidboot.hardware=bowser
 TARGET_BOOTLOADER_BOARD_NAME := bowser
-TARGET_OTA_ASSERT_DEVICE := blaze_tablet,bowser,jem
 
 # Kernel Build
 TARGET_KERNEL_SOURCE := kernel/amazon/bowser-common
@@ -31,6 +30,10 @@ BOARD_RECOVERYIMAGE_PARTITION_SIZE := 8388608
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 929038336
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 12949893120
 BOARD_FLASH_BLOCK_SIZE := 131072
+
+# Custom DOMX
+TI_CUSTOM_DOMX_PATH := $(BOWSER_COMMON_FOLDER)/domx
+DOMX_PATH := $(BOWSER_COMMON_FOLDER)/domx
 
 # Graphics
 BOARD_EGL_CFG := $(BOWSER_COMMON_FOLDER)/prebuilt/etc/egl.cfg

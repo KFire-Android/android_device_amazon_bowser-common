@@ -1,8 +1,9 @@
-BOWSER_COMMON_FOLDER := device/amazon/bowser-common
 COMMON_FOLDER := device/amazon/omap4-common
-TARGET_BOOTLOADER_BOARD_SUBTYPE := jem
+BOWSER_COMMON_FOLDER := device/amazon/bowser-common
 
 $(call inherit-product, $(COMMON_FOLDER)/common.mk)
+
+DEVICE_PACKAGE_OVERLAYS += $(BOWSER_COMMON_FOLDER)/overlay/aosp
 
 PRODUCT_AAPT_CONFIG := xlarge hdpi xhdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
