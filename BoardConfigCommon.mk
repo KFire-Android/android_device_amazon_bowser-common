@@ -19,10 +19,6 @@ BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_CMDLINE := mem=1G console=/dev/null rootdelay=2 init=/init androidboot.console=ttyO2 androidboot.hardware=bowser
 TARGET_BOOTLOADER_BOARD_NAME := bowser
 
-# Kernel Build
-TARGET_KERNEL_SOURCE := kernel/amazon/bowser-common
-TARGET_KERNEL_CONFIG := jem_android_defconfig
-
 # Filesystem
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_BOOTIMAGE_PARTITION_SIZE := 8388608
