@@ -9,14 +9,14 @@ PRODUCT_AAPT_CONFIG := xlarge hdpi xhdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
 
 
+#    audio.primary.bowser \
+#    audio.hdmi.bowser
 # Hardware HALs
 PRODUCT_PACKAGES += \
     hwcomposer.bowser \
     lights.bowser \
     power.bowser \
     camera.bowser \
-    audio.primary.bowser \
-    audio.hdmi.bowser
 
 # BT
 PRODUCT_PACKAGES += \
@@ -48,7 +48,29 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh
 
-$(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
+# TI OMAP4
+PRODUCT_PACKAGES += \
+    libdomx \
+    libOMX_Core \
+    libOMX.TI.DUCATI1.VIDEO.H264E \
+    libOMX.TI.DUCATI1.VIDEO.H264SVCE \
+    libOMX.TI.DUCATI1.VIDEO.VC1E \
+    libOMX.TI.DUCATI1.VIDEO.MPEG4E \
+    libOMX.TI.DUCATI1.VIDEO.DECODER \
+    libOMX.TI.DUCATI1.VIDEO.DECODER.secure \
+    libOMX.TI.DUCATI1.VIDEO.CAMERA \
+    libOMX.TI.DUCATI1.MISC.SAMPLE \
+    libstagefrighthw \
+    libI420colorconvert \
+    libtiutils \
+    libcamera \
+    libion_ti \
+    libomxcameraadapter \
+    smc_pa_ctrl \
+    tf_daemon \
+    libtf_crypto_sst
+
+#$(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
 $(call inherit-product-if-exists, $(BOWSER_COMMON_FOLDER)/prebuilt/camera/vendor-camera.mk)
 $(call inherit-product-if-exists, $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/bcmdhd-wifi.mk)
 $(call inherit-product-if-exists, $(COMMON_FOLDER)/imgtec/sgx-imgtec-bins-544.mk)
