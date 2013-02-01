@@ -16,7 +16,7 @@ USE_CAMERA_STUB := false
 
 # Kernel
 BOARD_KERNEL_PAGESIZE := 2048
-BOARD_KERNEL_CMDLINE := mem=1G console=/dev/null rootdelay=2 init=/init androidboot.console=ttyO2 androidboot.hardware=bowser
+BOARD_KERNEL_CMDLINE := mem=1G console=/dev/null rootdelay=2 init=/init androidboot.console=ttyO2 androidboot.hardware=bowser vmalloc=496M
 TARGET_BOOTLOADER_BOARD_NAME := bowser
 
 # Filesystem
@@ -34,6 +34,9 @@ DOMX_PATH := $(BOWSER_COMMON_FOLDER)/domx
 # Graphics
 BOARD_EGL_CFG := $(BOWSER_COMMON_FOLDER)/prebuilt/etc/egl.cfg
 BOARD_CREATE_AMAZON_HDCP_KEYS_SYMLINK := true
+
+# Audio
+COMMON_GLOBAL_CFLAGS += -DICS_AUDIO_BLOB
 
 # Recovery
 TARGET_RECOVERY_INITRC := $(BOWSER_COMMON_FOLDER)/recovery/init.recovery.rc
