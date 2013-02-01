@@ -18,7 +18,8 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES := \
     libdl \
     liblog \
-    libc
+    libc \
+    libcutils
 
 LOCAL_CFLAGS += -DOMAP_2430 -DOMX_DEBUG -D_Android -D_POSIX_VERSION_1_
 LOCAL_CFLAGS += -DTIMM_OSAL_DEBUG_TRACE_DETAIL=1 # quiet
