@@ -23,26 +23,25 @@ PRODUCT_PACKAGES += \
     uim-sysfs \
     brcm_patchram_plus
 
+# Wifi
+PRODUCT_PACKAGES += \
+    lib_driver_cmd_bcmdhd \
+    libnetcmdiface
+
 # Rootfs
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/init.bowser.usb.rc:root/init.bowser.usb.rc \
     $(BOWSER_COMMON_FOLDER)/ueventd.bowser.rc:root/ueventd.bowser.rc
 
-# Prebuilts /system/bin
-PRODUCT_COPY_FILES += \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/bin/battery_log.sh:/system/bin/battery_log.sh \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/bin/cond_start_ril:/system/bin/cond_start_ril \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/bin/emmc_init.sh:/system/bin/emmc_init.sh \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/bin/temperature_log.sh:/system/bin/temperature_log.sh \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/bin/thermal_setup.sh:/system/bin/thermal_setup.sh
-
 # Prebuilts /system/etc
 PRODUCT_COPY_FILES += \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/etc/audio_policy.conf:/system/etc/audio_policy.conf \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/etc/media_codecs.xml:/system/etc/media_codecs.xml \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/etc/media_profiles.xml:/system/etc/media_profiles.xml \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/etc/vold.fstab:/system/etc/vold.fstab \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/etc/smc_normal_world_android_cfg.ini:/system/etc/smc_normal_world_android_cfg.ini
+    $(BOWSER_COMMON_FOLDER)/prebuilt/audio_policy.conf:/system/etc/audio_policy.conf \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/media_codecs.xml:/system/etc/media_codecs.xml \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/media_profiles.xml:/system/etc/media_profiles.xml \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/vold.fstab:/system/etc/vold.fstab \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/smc_normal_world_android_cfg.ini:/system/etc/smc_normal_world_android_cfg.ini \
+
+#    $(BOWSER_COMMON_FOLDER)/prebuilt/etc/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf
 
 # postrecoveryboot for recovery
 PRODUCT_COPY_FILES += \
@@ -70,7 +69,5 @@ PRODUCT_PACKAGES += \
     tf_daemon \
     libtf_crypto_sst
 
-#$(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
-$(call inherit-product-if-exists, $(BOWSER_COMMON_FOLDER)/prebuilt/camera/vendor-camera.mk)
 $(call inherit-product-if-exists, $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/bcmdhd-wifi.mk)
-$(call inherit-product-if-exists, $(COMMON_FOLDER)/imgtec/sgx-imgtec-bins-544.mk)
+$(call inherit-product-if-exists, vendor/amazon/bowser-common/bowser-common-vendor.mk)
