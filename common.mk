@@ -28,11 +28,6 @@ PRODUCT_PACKAGES += \
     lib_driver_cmd_bcmdhd \
     libnetcmdiface
 
-# Rootfs
-PRODUCT_COPY_FILES += \
-    $(BOWSER_COMMON_FOLDER)/init.bowser.usb.rc:root/init.bowser.usb.rc \
-    $(BOWSER_COMMON_FOLDER)/ueventd.bowser.rc:root/ueventd.bowser.rc
-
 # Prebuilts /system/etc
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/prebuilt/audio_policy.conf:/system/etc/audio_policy.conf \
@@ -69,5 +64,4 @@ PRODUCT_PACKAGES += \
     tf_daemon \
     libtf_crypto_sst
 
-$(call inherit-product-if-exists, $(BOWSER_COMMON_FOLDER)/bcmdhd-wifi/bcmdhd-wifi.mk)
 $(call inherit-product-if-exists, vendor/amazon/bowser-common/bowser-common-vendor.mk)
