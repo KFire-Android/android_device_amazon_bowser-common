@@ -1,0 +1,114 @@
+#
+# This file lists all of the proprietary blobs that need to be
+# extracted from a stock device. The extract-files.sh script
+# parses this file and copies the blobs into the vendor and build
+# trees as needed.
+#
+# File format:
+#   - Comments lines start with a hash (#) character and will be
+#     ignore.
+#   - Blobs should be listed with their path relative to /system
+#     on the device.
+#   - A different destination path may be specified after a colon on
+#     the same line as the blob source path. Otherwise, the
+#     destination path with be the same as it was on the device.
+#   - Options for a particular blob are specified in a comment
+#     after the blob path.
+#
+# Blob options:
+#   - needed_for_build: the blob will also be copied into the obj
+#     directory for use in the build of other open source files.
+#   - optional: if the blob is not found, extraction will not abort.
+#     directory for use in the build of other open source files.
+#
+
+# Bins
+bin/battery_log.sh
+bin/bbx
+bin/cond_start_ril
+bin/emmc_init.sh
+bin/temperature_log.sh
+bin/thermal_setup.sh
+
+# Wifi cal files
+etc/wifi/nvram_tate_usi.txt
+etc/wifi/nvram_tate_semco.txt
+etc/wifi/nvram_jem_semco.txt
+etc/wifi/nvram_jem_usi.txt
+etc/wifi/nvram_jem-wan_semco.txt
+etc/wifi/nvram_jem-wan_usi.txt
+etc/wifi/bcmdhd.cal
+
+# Libs
+lib/libsmartvolume.so
+
+# Vendor SmartVolume Files
+vendor/data/ds1-default.xml
+vendor/smartvolume/anlg_dock_headset.csv
+vendor/smartvolume/aux_digital.csv
+vendor/smartvolume/bt_a2dp.csv
+vendor/smartvolume/bt_a2dp_headphones.csv
+vendor/smartvolume/bt_a2dp_speaker.csv
+vendor/smartvolume/bt_sco_carkit.csv
+vendor/smartvolume/bt_sco.csv
+vendor/smartvolume/bt_sco_headset.csv
+vendor/smartvolume/default.csv
+vendor/smartvolume/dgtl_dock_headeset.csv
+vendor/smartvolume/earpiece.csv
+vendor/smartvolume/fm_radio_tx.csv
+vendor/smartvolume/speaker.csv
+vendor/smartvolume/wired_headphone.csv
+vendor/smartvolume/wired_headset.csv
+
+# Camera
+vendor/bin/camera_dcc
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_ae_mms2_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_affw_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_affw_dcc_tuning.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_caf_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_caf_dcc_tuning.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_hllc_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_hllc_dcc_tuning.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_saf_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_af_saf_dcc_tuning.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_adjust_rgb2rgb_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_awb_alg_ti3_gains_adjust.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_awb_alg_ti3_tuning.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_capabilities.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_current_module_calibration.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ducati_eff_tun.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ducati_gamma.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ducati_lsc_2d.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ducati_nsf_ldc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_face_detect_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_face_tracking_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_gbce_sw1_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_golden_module_calibration.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_h3a_aewb_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_3d_lut_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_car_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_cfai_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_cgs_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_dpc_lut_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_dpc_otf.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_ee_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_gic_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_nf1_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_nf2_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_rgb2rgb_1_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_rgb2rgb_2_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_rgb2yuv_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_rsz_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ipipe_yuv444_to_yuv422_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_isif_clamp_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_isif_csc_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_iss_glbce3_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_iss_lbce_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_iss_scene_modes_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_iss_vstab_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ldc_cac_cfg_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_ldc_cfg_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_lsc_interp.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_vnf_cfg_dcc.bin
+vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid65535_kgen_dcc_preflash.bin
+
