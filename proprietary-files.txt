@@ -39,27 +39,6 @@ etc/wifi/nvram_jem-wan_semco.txt
 etc/wifi/nvram_jem-wan_usi.txt
 etc/wifi/bcmdhd.cal
 
-# Libs
-lib/libsmartvolume.so
-
-# Vendor SmartVolume Files
-vendor/data/ds1-default.xml
-vendor/smartvolume/anlg_dock_headset.csv
-vendor/smartvolume/aux_digital.csv
-vendor/smartvolume/bt_a2dp.csv
-vendor/smartvolume/bt_a2dp_headphones.csv
-vendor/smartvolume/bt_a2dp_speaker.csv
-vendor/smartvolume/bt_sco_carkit.csv
-vendor/smartvolume/bt_sco.csv
-vendor/smartvolume/bt_sco_headset.csv
-vendor/smartvolume/default.csv
-vendor/smartvolume/dgtl_dock_headeset.csv
-vendor/smartvolume/earpiece.csv
-vendor/smartvolume/fm_radio_tx.csv
-vendor/smartvolume/speaker.csv
-vendor/smartvolume/wired_headphone.csv
-vendor/smartvolume/wired_headset.csv
-
 # Camera
 vendor/bin/camera_dcc
 vendor/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46/cid44_OV9726_alg_3a_ae_mms2_dcc.bin
