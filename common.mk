@@ -17,6 +17,8 @@ PRODUCT_PACKAGES += \
     lights.bowser \
     power.bowser \
     camera.bowser \
+    audio.primary.bowser \
+    audio.hdmi.bowser
 
 # BT
 PRODUCT_PACKAGES += \
