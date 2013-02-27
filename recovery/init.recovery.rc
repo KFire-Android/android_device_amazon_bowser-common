@@ -1,3 +1,5 @@
+import /init.recovery.${ro.hardware}.rc
+
 on early-init
     start ueventd
 
@@ -12,7 +14,10 @@ on init
 
     mkdir /boot
     mkdir /bootdata
+    mkdir /recovery
     mkdir /sdcard
+    mkdir /internal_sd
+    mkdir /external_sd
     mkdir /sd-ext
     mkdir /datadata
     mkdir /emmc
@@ -20,20 +25,31 @@ on init
     mkdir /data
     mkdir /cache
     mount /tmp /tmp tmpfs
+
     mount vfat /dev/block/platform/mmci-omap-hs.1/by-name/bootdata /bootdata
     exec /sbin/dd if=/dev/zero of=/bootdata/BootCnt bs=1 count=4
 
+    chown root shell /tmp
+    chmod 0775 /tmp
+
     insmod /sbin/atmel_mxt_ts.ko
+
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 18D1
+    write /sys/class/android_usb/android0/idProduct D001
+    write /sys/class/android_usb/android0/functions adb
+    write /sys/class/android_usb/android0/iManufacturer ${ro.product.manufacturer}
+    write /sys/class/android_usb/android0/iProduct ${ro.product.model}
+    write /sys/class/android_usb/android0/iSerial ${ro.serialno}
+
 
 on boot
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ondemand
 
-    # reduce backlight usage in recovery
-    write /sys/class/backlight/lcd-backlight/brightness 200
-
     ifup lo
     hostname localhost
     domainname localdomain
+
     class_start default
 
 service ueventd /sbin/ueventd
@@ -45,17 +61,9 @@ service adbd /sbin/adbd recovery
     disabled
 
 # Always start adbd on userdebug and eng builds
-# In recovery, always run adbd as root.
 on property:ro.debuggable=1
-    write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 18D1
-    write /sys/class/android_usb/android0/idProduct 6868
-    write /sys/class/android_usb/android0/functions mass_storage,adb
-#    write /sys/class/android_usb/android0/enable 1
-    write /sys/class/android_usb/android0/iManufacturer $ro.product.manufacturer
-    write /sys/class/android_usb/android0/iProduct $ro.product.model
-    write /sys/class/android_usb/android0/iSerial $ro.serialno
-#    start adbd
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
     setprop service.adb.root 1
 
 # Restart adbd so it can run as root
