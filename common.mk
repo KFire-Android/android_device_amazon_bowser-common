@@ -57,7 +57,7 @@ PRODUCT_PACKAGES += \
     libOMX.TI.DUCATI1.MISC.SAMPLE \
     libstagefrighthw \
     libI420colorconvert \
-    libtiutils \
+    libtiutils_custom \
     libcamera \
     libion_ti \
     libomxcameraadapter \
