@@ -9,6 +9,9 @@ BOARD_HAVE_BLUETOOTH_BCM := true
 
 # Camera
 TI_OMAP4_CAMERAHAL_VARIANT := true
+TI_CAMERAHAL_DEBUG_ENABLED := true
+TI_CAMERAHAL_VERBOSE_DEBUG_ENABLED := true
+TI_CAMERAHAL_DEBUG_FUNCTION_NAMES := true
 USE_CAMERA_STUB := false
 
 # inherit from the proprietary version
