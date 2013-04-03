@@ -67,6 +67,8 @@ RECOVERY_SDCARD_ON_DATA := true
 TW_ALWAYS_RMRF := true
 TARGET_USERIMAGES_USE_EXT4 := true
 TW_CUSTOM_POWER_BUTTON := 107
-
+TW_BRIGHTNESS_PATH := /sys/class/backlight/bowser/brightness
+TW_MAX_BRIGHTNESS := 254
+TW_CUSTOM_BATTERY_PATH := /sys/class/power_supply/bq27541
 # ICS ril version
 LEGACY_RIL := true
