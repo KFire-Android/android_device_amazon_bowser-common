@@ -60,6 +60,23 @@
 /* number of periods for capture */
 #define CAPTURE_PERIOD_COUNT 2
 
+
+/* ALSA cards */
+#define CARD_ABE 0
+#define CARD_HDMI 1
+#define CARD_USB 2
+#define CARD_DEFAULT CARD_ABE
+
+/* ALSA ports */
+#define PORT_MM_LP	0
+#define PORT_MM 	1
+#define PORT_WM8962 	2
+#define PORT_MIC_CAP 	3
+#define PORT_BT_OUT 	4
+#define PORT_BT_IN 	5
+#define PORT_PCM_OUT 	6
+#define PORT_PCM_IN 	7
+
 struct route_setting
 {
     char *ctl_name;
@@ -105,11 +122,10 @@ static float system_volume = .8;
 
 /* The enable flag when 0 makes the assumption that enums are disabled by
  * "Off" and integers/booleans by 0 */
-static int set_route_by_array(struct mixer *mixer, struct route_setting *route,
-			      unsigned int len)
+static int set_route_by_array(struct mixer *mixer, struct route_setting *route, unsigned int len)
 {
     struct mixer_ctl *ctl;
-    unsigned int i, j, ret;
+    unsigned int i, j, ret, temp;
 
     /* Go through the route array and set each value */
     for (i = 0; i < len; i++) {
@@ -132,19 +148,25 @@ static int set_route_by_array(struct mixer *mixer, struct route_setting *route,
             /* This ensures multiple (i.e. stereo) values are set jointly */
 	    for (j = 0; j < mixer_ctl_get_num_values(ctl); j++) {
 		// FIXME-HASH: Setup special volume cases
-		if (((strcmp(route[i].ctl_name, "Speaker Volume") == 0) || (strcmp(route[i].ctl_name, "Headphone Volume") == 0)) && (value > 0)) {
+		if (((strcmp(route[i].ctl_name, "Speaker Volume") == 0) ||
+                     (strcmp(route[i].ctl_name, "Headphone Volume") == 0))
+                         && (value > 0)) {
 		    if (j == 0)
-		        ret = mixer_ctl_set_value(ctl, j, (int)(stream_volume_left * max));
+                        temp = (int)(stream_volume_left * max);
 		    else
-		        ret = mixer_ctl_set_value(ctl, j, (int)(stream_volume_right * max));
+                        temp = (int)(stream_volume_right * max);
+                    ret = mixer_ctl_set_value(ctl, j, temp);
+                    if (ret != 0)
+                        ALOGE("Failed to set '%s'.%d to %d\n", route[i].ctl_name, j, temp);
+                    else
+                        ALOGD("Set '%s'.%d to %d\n", route[i].ctl_name, j, temp);
 		}
 		else {
 		    ret = mixer_ctl_set_value(ctl, j, value);
-		    if (ret != 0) {
-		        ALOGE("Failed to set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
-		    } else {
-		        ALOGD("Set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
-		    }
+                    if (ret != 0)
+                        ALOGE("Failed to set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
+                    else
+                        ALOGD("Set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
 		}
 	    }
         }
@@ -172,9 +194,12 @@ struct tiny_audio_device {
     pthread_mutex_t route_lock;
     struct tiny_dev_cfg *dev_cfgs;
     int num_dev_cfgs;
-    int active_devices; // handled during device switch
-    // FIXME-HASH: Redesign for in/out devices
-    int devices;
+
+    int devices_out;
+    int active_devices_out;
+
+    int devices_in;
+    int active_devices_in;
 
     bool mic_mute;
 };
@@ -260,29 +285,48 @@ static size_t get_input_buffer_size(uint32_t sample_rate, int format, int channe
 }
 
 /* Must be called with route_lock */
-void select_devices(struct tiny_audio_device *adev)
+void select_output_devices(struct tiny_audio_device *adev)
 {
     int i;
 
-    if (adev->active_devices == adev->devices)
+    if (adev->active_devices_out == adev->devices_out)
 	return;
 
-    ALOGD("Changing devices 0x%x => 0x%x\n", adev->active_devices, adev->devices);
+    ALOGD("Changing OUTPUT devices 0x%x => 0x%x\n", adev->active_devices_out, adev->devices_out);
 
     /* Turn on new devices first so we don't glitch due to powerdown... */
     for (i = 0; i < adev->num_dev_cfgs; i++)
-	if ((adev->devices & adev->dev_cfgs[i].mask) &&
-	    !(adev->active_devices & adev->dev_cfgs[i].mask))
+	if ((adev->devices_out & adev->dev_cfgs[i].mask) && !(adev->active_devices_out & adev->dev_cfgs[i].mask))
 	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].on, adev->dev_cfgs[i].on_len);
 
     /* ...then disable old ones. */
     for (i = 0; i < adev->num_dev_cfgs; i++)
-	if (!(adev->devices & adev->dev_cfgs[i].mask) &&
-	    (adev->active_devices & adev->dev_cfgs[i].mask))
-	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].off,
-			       adev->dev_cfgs[i].off_len);
+	if (!(adev->devices_out & adev->dev_cfgs[i].mask) && (adev->active_devices_out & adev->dev_cfgs[i].mask))
+	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].off, adev->dev_cfgs[i].off_len);
 
-    adev->active_devices = adev->devices;
+    adev->active_devices_out = adev->devices_out;
+}
+
+void select_input_devices(struct tiny_audio_device *adev)
+{
+    int i;
+
+    if (adev->active_devices_in == adev->devices_in)
+	return;
+
+    ALOGD("Changing INPUT devices 0x%x => 0x%x\n", adev->active_devices_in, adev->devices_in);
+
+    /* Turn on new devices first so we don't glitch due to powerdown... */
+    for (i = 0; i < adev->num_dev_cfgs; i++)
+	if ((adev->devices_in & adev->dev_cfgs[i].mask) && !(adev->active_devices_in & adev->dev_cfgs[i].mask))
+	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].on, adev->dev_cfgs[i].on_len);
+
+    /* ...then disable old ones. */
+    for (i = 0; i < adev->num_dev_cfgs; i++)
+	if (!(adev->devices_in & adev->dev_cfgs[i].mask) && (adev->active_devices_in & adev->dev_cfgs[i].mask))
+	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].off, adev->dev_cfgs[i].off_len);
+
+    adev->active_devices_in = adev->devices_in;
 }
 
 static uint32_t out_get_sample_rate(const struct audio_stream *stream)
@@ -333,11 +377,10 @@ static int out_standby(struct audio_stream *stream)
 	}
 	out->pcm = NULL;
 
-        // FIXME-HASH: Send "OFF" routing to OUT devices
-	for (i = 0; i < out->adev->num_dev_cfgs; i++) {
-	    if ((out->adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN) && (out->adev->devices & out->adev->dev_cfgs[i].mask))
-		set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].off, out->adev->dev_cfgs[i].off_len);
-	}
+        // Set OUT devices to OFF route
+        for (i = 0; i < out->adev->num_dev_cfgs; i++)
+            if (out->adev->devices_out & out->adev->dev_cfgs[i].mask)
+                set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].off, out->adev->dev_cfgs[i].off_len);
     }
 
     return 0;
@@ -368,9 +411,9 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
 	if (val != 0) {
 	    pthread_mutex_lock(&adev->route_lock);
 
-            adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
-            adev->devices |= val;
-            select_devices(adev);
+            adev->devices_out &= ~AUDIO_DEVICE_OUT_ALL;
+            adev->devices_out |= val;
+            select_output_devices(adev);
 
 	    pthread_mutex_unlock(&adev->route_lock);
 	} else {
@@ -393,33 +436,36 @@ static uint32_t out_get_latency(const struct audio_stream_out *stream)
     return 0;
 }
 
-static int out_set_volume(struct audio_stream_out *stream, float left,
-                          float right)
+static int out_set_volume(struct audio_stream_out *stream, float left, float right)
 {
-    /* Use the soft volume control for now; AudioFlinger rarely
-     * actually calls down. */
     stream_volume_left = left;
     stream_volume_right = right;
     ALOGD("out_set_volume(%f,%f)\n", stream_volume_left, stream_volume_right);
-    return -EINVAL;
+    return 0;
 }
 
-static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
-                         size_t bytes)
+static ssize_t out_write(struct audio_stream_out *stream, const void* buffer, size_t bytes)
 {
     struct tiny_stream_out *out = (struct tiny_stream_out *)stream;
+    struct tiny_audio_device *adev = out->adev;
+    unsigned int card = CARD_DEFAULT;
+    unsigned int port = PORT_MM_LP;
     int ret;
     int i;
 
     if (!out->pcm) {
-        // FIXME-HASH: Send "ON" routing to OUT devices
-	for (i = 0; i < out->adev->num_dev_cfgs; i++) {
-	    if ((out->adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN) && (out->adev->devices & out->adev->dev_cfgs[i].mask))
+        // Set OUT devices to ON route (first time in out_write for this stream)
+	for (i = 0; i < out->adev->num_dev_cfgs; i++)
+	    if (out->adev->devices_out & out->adev->dev_cfgs[i].mask)
 	        set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].on, out->adev->dev_cfgs[i].on_len);
-	}
 
-	ALOGD("out_write(%p) opening PCM\n", stream);
-	out->pcm = pcm_open(0, 0, PCM_OUT | PCM_MMAP, &out->config);
+        if ((adev->devices_out & AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET) || (adev->devices_out & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) {
+            card = CARD_USB;
+            port = PORT_MM_LP;
+        }
+
+	ALOGD("out_write(%p) opening PCM (%d, %d)\n", stream, card, port);
+	out->pcm = pcm_open(card, port, PCM_OUT | PCM_MMAP, &out->config);
 
 	if (!pcm_is_ready(out->pcm)) {
 	    ALOGE("Failed to open output PCM: %s", pcm_get_error(out->pcm));
@@ -486,7 +532,25 @@ static int in_set_format(struct audio_stream *stream, audio_format_t format)
 
 static int in_standby(struct audio_stream *stream)
 {
-    return 0;
+    struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+    int ret = 0;
+    int i;
+
+    if (in->pcm) {
+	ALOGD("in_standby(%p) closing PCM\n", stream);
+	ret = pcm_close(in->pcm);
+	if (ret != 0) {
+	    ALOGE("in_standby(%p) failed: %d\n", stream, ret);
+	    return ret;
+	}
+	in->pcm = NULL;
+
+        // Set IN devices to OFF route
+        for (i = 0; i < in->adev->num_dev_cfgs; i++)
+            if (in->adev->devices_in & in->adev->dev_cfgs[i].mask)
+                set_route_by_array(in->adev->mixer, in->adev->dev_cfgs[i].off, in->adev->dev_cfgs[i].off_len);
+    }
+    return ret;
 }
 
 static int in_dump(const struct audio_stream *stream, int fd)
@@ -510,12 +574,39 @@ static int in_set_gain(struct audio_stream_in *stream, float gain)
     return 0;
 }
 
-static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
-                       size_t bytes)
+static ssize_t in_read(struct audio_stream_in *stream, void* buffer, size_t bytes)
 {
-    // FIXME-HASH: fake timing for audio input */
-    usleep(bytes * 1000000 / audio_stream_frame_size(&stream->common) /
-           in_get_sample_rate(&stream->common));
+    struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+    int ret = 0;
+    int i;
+    unsigned int card = CARD_DEFAULT;
+    unsigned int device = PORT_MIC_CAP;
+
+    if (!in->pcm) {
+        // Set IN devices to IN route (first time in in_read for this stream)
+        for (i = 0; i < in->adev->num_dev_cfgs; i++)
+            if (in->adev->devices_in & in->adev->dev_cfgs[i].mask)
+                set_route_by_array(in->adev->mixer, in->adev->dev_cfgs[i].on, in->adev->dev_cfgs[i].on_len);
+
+	// FIXME-HASH: Check for which input device is selected and change card/device accordingly
+
+	ALOGD("in_read(%p) opening PCM\n", stream);
+	in->pcm = pcm_open(card, device, PCM_IN | PCM_MMAP, &in->config);
+
+	if (!pcm_is_ready(in->pcm)) {
+	    ALOGE("Failed to open input PCM: %s", pcm_get_error(in->pcm));
+	    pcm_close(in->pcm);
+	    return -ENOMEM;
+	}
+    }
+
+    // FIXME-HASH: stubbed here
+
+exit:
+    if (ret < 0)
+        usleep(bytes * 1000000 / audio_stream_frame_size(&stream->common) /
+               in_get_sample_rate(&stream->common));
+
     return bytes;
 }
 
@@ -569,9 +660,9 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     out->adev = adev;
 
     pthread_mutex_lock(&adev->route_lock);
-    adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
-    adev->devices |= devices;
-    select_devices(adev);
+    adev->devices_out &= ~AUDIO_DEVICE_OUT_ALL;
+    adev->devices_out |= devices;
+    select_output_devices(adev);
     pthread_mutex_unlock(&adev->route_lock);
 
     config->format = out_get_format(&out->stream.common);
@@ -706,9 +797,9 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->stream.get_input_frames_lost = in_get_input_frames_lost;
 
     pthread_mutex_lock(&adev->route_lock);
-    adev->devices &= ~AUDIO_DEVICE_IN_ALL;
-    adev->devices |= devices;
-    select_devices(adev);
+    adev->devices_in &= ~AUDIO_DEVICE_IN_ALL;
+    adev->devices_in |= devices;
+    select_input_devices(adev);
     pthread_mutex_unlock(&adev->route_lock);
 
     memcpy(&in->config, &pcm_config_mm_ul, sizeof(pcm_config_mm_ul));
@@ -1028,8 +1119,10 @@ static int adev_open(const hw_module_t* module, const char* name,
     /* Bootstrap routing */
     pthread_mutex_init(&adev->route_lock, NULL);
     adev->mode = AUDIO_MODE_NORMAL;
-    adev->devices = AUDIO_DEVICE_OUT_SPEAKER | AUDIO_DEVICE_IN_BUILTIN_MIC;
-    select_devices(adev);
+    adev->devices_out = AUDIO_DEVICE_OUT_SPEAKER;
+    adev->devices_in = AUDIO_DEVICE_IN_BUILTIN_MIC;
+    select_output_devices(adev);
+    select_input_devices(adev);
 
     *device = &adev->device.common;
 
