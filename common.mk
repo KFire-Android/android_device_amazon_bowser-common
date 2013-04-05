@@ -42,7 +42,7 @@ PRODUCT_COPY_FILES += \
 # audio config files for bowser
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/audio/audio_policy.conf:/system/etc/audio_policy.conf \
-    $(BOWSER_COMMON_FOLDER)/audio/tiny_hw.xml:/system/etc/sound/$(TARGET_BOOTLOADER_BOARD_NAME)
+    $(BOWSER_COMMON_FOLDER)/audio/tiny_hw.xml:/system/etc/sound/bowser
 
 # postrecoveryboot for recovery
 PRODUCT_COPY_FILES += \
