@@ -116,10 +116,6 @@ struct pcm_config pcm_config_bt_in = {
     .format = PCM_FORMAT_S16_LE,
 };
 
-static float stream_volume_left = .8;
-static float stream_volume_right = .8;
-static float system_volume = .8;
-
 /* The enable flag when 0 makes the assumption that enums are disabled by
  * "Off" and integers/booleans by 0 */
 static int set_route_by_array(struct mixer *mixer, struct route_setting *route, unsigned int len)
@@ -144,30 +140,13 @@ static int set_route_by_array(struct mixer *mixer, struct route_setting *route, 
 		ALOGD("Set '%s' to '%s'\n", route[i].ctl_name, route[i].strval);
 	    }
         } else {
-	    int value = route[i].intval;
             /* This ensures multiple (i.e. stereo) values are set jointly */
 	    for (j = 0; j < mixer_ctl_get_num_values(ctl); j++) {
-		// FIXME-HASH: Setup special volume cases
-		if (((strcmp(route[i].ctl_name, "Speaker Volume") == 0) ||
-                     (strcmp(route[i].ctl_name, "Headphone Volume") == 0))
-                         && (value > 0)) {
-		    if (j == 0)
-                        temp = (int)(stream_volume_left * max);
-		    else
-                        temp = (int)(stream_volume_right * max);
-                    ret = mixer_ctl_set_value(ctl, j, temp);
-                    if (ret != 0)
-                        ALOGE("Failed to set '%s'.%d to %d\n", route[i].ctl_name, j, temp);
-                    else
-                        ALOGD("Set '%s'.%d to %d\n", route[i].ctl_name, j, temp);
-		}
-		else {
-		    ret = mixer_ctl_set_value(ctl, j, value);
-                    if (ret != 0)
-                        ALOGE("Failed to set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
-                    else
-                        ALOGD("Set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
-		}
+                ret = mixer_ctl_set_value(ctl, j, route[i].intval);
+                if (ret != 0)
+                    ALOGE("Failed to set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
+                else
+                    ALOGD("Set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
 	    }
         }
     }
@@ -176,7 +155,7 @@ static int set_route_by_array(struct mixer *mixer, struct route_setting *route, 
 }
 
 struct tiny_dev_cfg {
-    int mask;
+    unsigned int mask;
 
     struct route_setting *on;
     unsigned int on_len;
@@ -296,13 +275,15 @@ void select_output_devices(struct tiny_audio_device *adev)
 
     /* Turn on new devices first so we don't glitch due to powerdown... */
     for (i = 0; i < adev->num_dev_cfgs; i++)
-	if ((adev->devices_out & adev->dev_cfgs[i].mask) && !(adev->active_devices_out & adev->dev_cfgs[i].mask))
-	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].on, adev->dev_cfgs[i].on_len);
+        if (adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN)
+            if ((adev->devices_out & adev->dev_cfgs[i].mask) && !(adev->active_devices_out & adev->dev_cfgs[i].mask))
+                set_route_by_array(adev->mixer, adev->dev_cfgs[i].on, adev->dev_cfgs[i].on_len);
 
     /* ...then disable old ones. */
     for (i = 0; i < adev->num_dev_cfgs; i++)
-	if (!(adev->devices_out & adev->dev_cfgs[i].mask) && (adev->active_devices_out & adev->dev_cfgs[i].mask))
-	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].off, adev->dev_cfgs[i].off_len);
+        if (adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN)
+            if (!(adev->devices_out & adev->dev_cfgs[i].mask) && (adev->active_devices_out & adev->dev_cfgs[i].mask))
+	        set_route_by_array(adev->mixer, adev->dev_cfgs[i].off, adev->dev_cfgs[i].off_len);
 
     adev->active_devices_out = adev->devices_out;
 }
@@ -318,13 +299,15 @@ void select_input_devices(struct tiny_audio_device *adev)
 
     /* Turn on new devices first so we don't glitch due to powerdown... */
     for (i = 0; i < adev->num_dev_cfgs; i++)
-	if ((adev->devices_in & adev->dev_cfgs[i].mask) && !(adev->active_devices_in & adev->dev_cfgs[i].mask))
-	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].on, adev->dev_cfgs[i].on_len);
+        if (adev->dev_cfgs[i].mask >= AUDIO_DEVICE_BIT_IN)
+            if ((adev->devices_in & adev->dev_cfgs[i].mask) && !(adev->active_devices_in & adev->dev_cfgs[i].mask))
+                set_route_by_array(adev->mixer, adev->dev_cfgs[i].on, adev->dev_cfgs[i].on_len);
 
     /* ...then disable old ones. */
     for (i = 0; i < adev->num_dev_cfgs; i++)
-	if (!(adev->devices_in & adev->dev_cfgs[i].mask) && (adev->active_devices_in & adev->dev_cfgs[i].mask))
-	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].off, adev->dev_cfgs[i].off_len);
+        if (adev->dev_cfgs[i].mask >= AUDIO_DEVICE_BIT_IN)
+            if (!(adev->devices_in & adev->dev_cfgs[i].mask) && (adev->active_devices_in & adev->dev_cfgs[i].mask))
+                set_route_by_array(adev->mixer, adev->dev_cfgs[i].off, adev->dev_cfgs[i].off_len);
 
     adev->active_devices_in = adev->devices_in;
 }
@@ -379,8 +362,9 @@ static int out_standby(struct audio_stream *stream)
 
         // Set OUT devices to OFF route
         for (i = 0; i < out->adev->num_dev_cfgs; i++)
-            if (out->adev->devices_out & out->adev->dev_cfgs[i].mask)
-                set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].off, out->adev->dev_cfgs[i].off_len);
+            if (out->adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN)
+                if (out->adev->devices_out & out->adev->dev_cfgs[i].mask)
+                    set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].off, out->adev->dev_cfgs[i].off_len);
     }
 
     return 0;
@@ -438,9 +422,7 @@ static uint32_t out_get_latency(const struct audio_stream_out *stream)
 
 static int out_set_volume(struct audio_stream_out *stream, float left, float right)
 {
-    stream_volume_left = left;
-    stream_volume_right = right;
-    ALOGD("out_set_volume(%f,%f)\n", stream_volume_left, stream_volume_right);
+    ALOGD("out_set_volume(%f,%f)\n", left, right);
     return 0;
 }
 
@@ -456,8 +438,9 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer, si
     if (!out->pcm) {
         // Set OUT devices to ON route (first time in out_write for this stream)
 	for (i = 0; i < out->adev->num_dev_cfgs; i++)
-	    if (out->adev->devices_out & out->adev->dev_cfgs[i].mask)
-	        set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].on, out->adev->dev_cfgs[i].on_len);
+            if (out->adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN)
+                if (out->adev->devices_out & out->adev->dev_cfgs[i].mask)
+	            set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].on, out->adev->dev_cfgs[i].on_len);
 
         if ((adev->devices_out & AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET) || (adev->devices_out & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) {
             card = CARD_USB;
@@ -547,8 +530,9 @@ static int in_standby(struct audio_stream *stream)
 
         // Set IN devices to OFF route
         for (i = 0; i < in->adev->num_dev_cfgs; i++)
-            if (in->adev->devices_in & in->adev->dev_cfgs[i].mask)
-                set_route_by_array(in->adev->mixer, in->adev->dev_cfgs[i].off, in->adev->dev_cfgs[i].off_len);
+            if (in->adev->dev_cfgs[i].mask >= AUDIO_DEVICE_BIT_IN)
+                if (in->adev->devices_in & in->adev->dev_cfgs[i].mask)
+                    set_route_by_array(in->adev->mixer, in->adev->dev_cfgs[i].off, in->adev->dev_cfgs[i].off_len);
     }
     return ret;
 }
@@ -585,8 +569,9 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer, size_t byte
     if (!in->pcm) {
         // Set IN devices to IN route (first time in in_read for this stream)
         for (i = 0; i < in->adev->num_dev_cfgs; i++)
-            if (in->adev->devices_in & in->adev->dev_cfgs[i].mask)
-                set_route_by_array(in->adev->mixer, in->adev->dev_cfgs[i].on, in->adev->dev_cfgs[i].on_len);
+            if (in->adev->dev_cfgs[i].mask >= AUDIO_DEVICE_BIT_IN)
+                if (in->adev->devices_in & in->adev->dev_cfgs[i].mask)
+                    set_route_by_array(in->adev->mixer, in->adev->dev_cfgs[i].on, in->adev->dev_cfgs[i].on_len);
 
 	// FIXME-HASH: Check for which input device is selected and change card/device accordingly
 
@@ -712,13 +697,13 @@ static int adev_init_check(const struct audio_hw_device *dev)
 static int adev_set_voice_volume(struct audio_hw_device *dev, float volume)
 {
     ALOGD("CALL adev_set_voice_volume dev=%p, volume=%f", dev, volume);
-    return -ENOSYS;
+    return 0;
 }
 
 static int adev_set_master_volume(struct audio_hw_device *dev, float volume)
 {
     ALOGD("CALL adev_set_master_volume dev=%p, volume=%f", dev, volume);
-    return -ENOSYS;
+    return 0;
 }
 
 static int adev_set_mode(struct audio_hw_device *dev, int mode)
