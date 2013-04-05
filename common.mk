@@ -37,7 +37,8 @@ PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/prebuilt/media_profiles.xml:/system/etc/media_profiles.xml \
     $(BOWSER_COMMON_FOLDER)/prebuilt/vold.fstab:/system/etc/vold.fstab \
     $(BOWSER_COMMON_FOLDER)/prebuilt/smc_normal_world_android_cfg.ini:/system/etc/smc_normal_world_android_cfg.ini \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf
+    $(BOWSER_COMMON_FOLDER)/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/bu52061.kl:system/usr/keylayout/bu52061.kl
 
 # postrecoveryboot for recovery
 PRODUCT_COPY_FILES += \
