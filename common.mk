@@ -23,7 +23,7 @@ PRODUCT_PACKAGES += \
 # BT
 PRODUCT_PACKAGES += \
     uim-sysfs \
-    brcm_patchram_plus
+    libbt-vendor
 
 # Wifi
 PRODUCT_PACKAGES += \
