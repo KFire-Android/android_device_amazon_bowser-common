@@ -99,6 +99,10 @@ struct pcm_config pcm_config_bt_in = {
     .format = PCM_FORMAT_S16_LE,
 };
 
+static float stream_volume_left = .8;
+static float stream_volume_right = .8;
+static float system_volume = .8;
+
 /* The enable flag when 0 makes the assumption that enums are disabled by
  * "Off" and integers/booleans by 0 */
 static int set_route_by_array(struct mixer *mixer, struct route_setting *route,
@@ -115,26 +119,32 @@ static int set_route_by_array(struct mixer *mixer, struct route_setting *route,
             return -EINVAL;
 	}
 
-        if (route[i].strval) {
+	int max = mixer_ctl_get_range_max(ctl);
+	if (route[i].strval) {
 	    ret = mixer_ctl_set_enum_by_string(ctl, route[i].strval);
 	    if (ret != 0) {
-		ALOGE("Failed to set '%s' to '%s'\n",
-		     route[i].ctl_name, route[i].strval);
+		ALOGE("Failed to set '%s' to '%s'\n", route[i].ctl_name, route[i].strval);
 	    } else {
-		ALOGD("Set '%s' to '%s'\n",
-		     route[i].ctl_name, route[i].strval);
+		ALOGD("Set '%s' to '%s'\n", route[i].ctl_name, route[i].strval);
 	    }
-	    
         } else {
+	    int value = route[i].intval;
             /* This ensures multiple (i.e. stereo) values are set jointly */
-            for (j = 0; j < mixer_ctl_get_num_values(ctl); j++) {
-		ret = mixer_ctl_set_value(ctl, j, route[i].intval);
-		if (ret != 0) {
-		    ALOGE("Failed to set '%s'.%d to %d\n",
-			 route[i].ctl_name, j, route[i].intval);
-		} else {
-		    ALOGD("Set '%s'.%d to %d\n",
-			 route[i].ctl_name, j, route[i].intval);
+	    for (j = 0; j < mixer_ctl_get_num_values(ctl); j++) {
+		// FIXME-HASH: Setup special volume cases
+		if (((strcmp(route[i].ctl_name, "Speaker Volume") == 0) || (strcmp(route[i].ctl_name, "Headphone Volume") == 0)) && (value > 0)) {
+		    if (j == 0)
+		        ret = mixer_ctl_set_value(ctl, j, (int)(stream_volume_left * max));
+		    else
+		        ret = mixer_ctl_set_value(ctl, j, (int)(stream_volume_right * max));
+		}
+		else {
+		    ret = mixer_ctl_set_value(ctl, j, value);
+		    if (ret != 0) {
+		        ALOGE("Failed to set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
+		    } else {
+		        ALOGD("Set '%s'.%d to %d\n", route[i].ctl_name, j, route[i].intval);
+		    }
 		}
 	    }
         }
@@ -162,7 +172,8 @@ struct tiny_audio_device {
     pthread_mutex_t route_lock;
     struct tiny_dev_cfg *dev_cfgs;
     int num_dev_cfgs;
-    int active_devices;
+    int active_devices; // handled during device switch
+    // FIXME-HASH: Redesign for in/out devices
     int devices;
 
     bool mic_mute;
@@ -256,14 +267,13 @@ void select_devices(struct tiny_audio_device *adev)
     if (adev->active_devices == adev->devices)
 	return;
 
-    ALOGD("Changing devices %x => %x\n", adev->active_devices, adev->devices);
+    ALOGD("Changing devices 0x%x => 0x%x\n", adev->active_devices, adev->devices);
 
     /* Turn on new devices first so we don't glitch due to powerdown... */
     for (i = 0; i < adev->num_dev_cfgs; i++)
 	if ((adev->devices & adev->dev_cfgs[i].mask) &&
 	    !(adev->active_devices & adev->dev_cfgs[i].mask))
-	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].on,
-			       adev->dev_cfgs[i].on_len);
+	    set_route_by_array(adev->mixer, adev->dev_cfgs[i].on, adev->dev_cfgs[i].on_len);
 
     /* ...then disable old ones. */
     for (i = 0; i < adev->num_dev_cfgs; i++)
@@ -312,6 +322,7 @@ static int out_standby(struct audio_stream *stream)
 {
     struct tiny_stream_out *out = (struct tiny_stream_out *)stream;
     int ret;
+    int i;
 
     if (out->pcm) {
 	ALOGD("out_standby(%p) closing PCM\n", stream);
@@ -321,6 +332,12 @@ static int out_standby(struct audio_stream *stream)
 	    return ret;
 	}
 	out->pcm = NULL;
+
+        // FIXME-HASH: Send "OFF" routing to OUT devices
+	for (i = 0; i < out->adev->num_dev_cfgs; i++) {
+	    if ((out->adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN) && (out->adev->devices & out->adev->dev_cfgs[i].mask))
+		set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].off, out->adev->dev_cfgs[i].off_len);
+	}
     }
 
     return 0;
@@ -381,6 +398,9 @@ static int out_set_volume(struct audio_stream_out *stream, float left,
 {
     /* Use the soft volume control for now; AudioFlinger rarely
      * actually calls down. */
+    stream_volume_left = left;
+    stream_volume_right = right;
+    ALOGD("out_set_volume(%f,%f)\n", stream_volume_left, stream_volume_right);
     return -EINVAL;
 }
 
@@ -389,8 +409,15 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
 {
     struct tiny_stream_out *out = (struct tiny_stream_out *)stream;
     int ret;
+    int i;
 
     if (!out->pcm) {
+        // FIXME-HASH: Send "ON" routing to OUT devices
+	for (i = 0; i < out->adev->num_dev_cfgs; i++) {
+	    if ((out->adev->dev_cfgs[i].mask < AUDIO_DEVICE_BIT_IN) && (out->adev->devices & out->adev->dev_cfgs[i].mask))
+	        set_route_by_array(out->adev->mixer, out->adev->dev_cfgs[i].on, out->adev->dev_cfgs[i].on_len);
+	}
+
 	ALOGD("out_write(%p) opening PCM\n", stream);
 	out->pcm = pcm_open(0, 0, PCM_OUT | PCM_MMAP, &out->config);
 
@@ -486,7 +513,7 @@ static int in_set_gain(struct audio_stream_in *stream, float gain)
 static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
                        size_t bytes)
 {
-    /* XXX: fake timing for audio input */
+    // FIXME-HASH: fake timing for audio input */
     usleep(bytes * 1000000 / audio_stream_frame_size(&stream->common) /
            in_get_sample_rate(&stream->common));
     return bytes;
@@ -516,6 +543,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     struct tiny_stream_out *out;
     int ret;
 
+    ALOGD("CALL adev_open_output_stream");
     out = calloc(1, sizeof(struct tiny_stream_out));
     if (!out)
         return -ENOMEM;
@@ -565,7 +593,7 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
                                      struct audio_stream_out *stream)
 {
     struct tiny_stream_out *out = (struct tiny_stream_out *)stream;
-    ALOGD("Closing output stream %p\n", stream);
+    ALOGD("CALL adev_close_output_stream: Closing output stream %p\n", stream);
     if (out->pcm)
 	pcm_close(out->pcm);
     free(stream);
@@ -573,32 +601,38 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
 
 static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
 {
+    ALOGD("CALL adev_set_parameters dev=%p, kvpairs=%s", dev, kvpairs);
     return -ENOSYS;
 }
 
 static char * adev_get_parameters(const struct audio_hw_device *dev,
                                   const char *keys)
 {
+    ALOGD("CALL adev_get_parameters dev=%p, keys=%s", dev, keys);
     return NULL;
 }
 
 static int adev_init_check(const struct audio_hw_device *dev)
 {
+    ALOGD("CALL adev_init_check dev=%p", dev);
     return 0;
 }
 
 static int adev_set_voice_volume(struct audio_hw_device *dev, float volume)
 {
+    ALOGD("CALL adev_set_voice_volume dev=%p, volume=%f", dev, volume);
     return -ENOSYS;
 }
 
 static int adev_set_master_volume(struct audio_hw_device *dev, float volume)
 {
+    ALOGD("CALL adev_set_master_volume dev=%p, volume=%f", dev, volume);
     return -ENOSYS;
 }
 
 static int adev_set_mode(struct audio_hw_device *dev, int mode)
 {
+    ALOGD("CALL adev_set_mode dev=%p, mode=%d", dev, mode);
     return 0;
 }
 
@@ -608,6 +642,7 @@ static int adev_set_mic_mute(struct audio_hw_device *dev, bool state)
     unsigned int channel;
 
     /* FIXME HASH: Finish Mic Mute handling / route */
+    ALOGD("CALL adev_set_mic_mute dev=%p, set state=%d", dev, state);
     adev->mic_mute = state;
 
     return 0;
@@ -617,6 +652,7 @@ static int adev_get_mic_mute(const struct audio_hw_device *dev, bool *state)
 {
     struct tiny_audio_device *adev = (struct tiny_audio_device *)dev;
 
+    ALOGD("CALL adev_get_mic_mute dev=%p, get state=%d", dev, adev->mic_mute);
     *state = adev->mic_mute;
 
     return 0;
@@ -626,6 +662,7 @@ static size_t adev_get_input_buffer_size(const struct audio_hw_device *dev,
                                          const struct audio_config *config)
 {
     int channel_count = popcount(config->channel_mask);
+    ALOGD("CALL adev_get_input_buffer_size dev=%p, config=%p", dev, config);
     if (check_input_parameters(config->sample_rate, config->format, channel_count) != 0) {
         return 0;
     }
@@ -645,6 +682,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     /*audioflinger expects return variable to be NULL incase of failure */
     *stream_in = NULL;
 
+    ALOGD("CALL adev_open_input_stream dev=%p, handle=%d, devices=0x%x, config=%p, stream_in=%p", dev, handle, devices, config, stream_in);
     in = (struct tiny_stream_in *)calloc(1, sizeof(struct tiny_stream_in));
     if (!in)
         return -ENOMEM;
@@ -691,6 +729,7 @@ static void adev_close_input_stream(struct audio_hw_device *dev,
 {
     struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
 
+    ALOGD("CALL adev_close_input_stream dev=%p, stream=%p", dev, stream);
     if (in->pcm)
 	pcm_close(in->pcm);
     free(in);
@@ -699,11 +738,13 @@ static void adev_close_input_stream(struct audio_hw_device *dev,
 
 static int adev_dump(const audio_hw_device_t *device, int fd)
 {
+    ALOGD("CALL adev_dump device=%p, fd=%d", device, fd);
     return 0;
 }
 
 static int adev_close(hw_device_t *device)
 {
+    ALOGD("CALL adev_close device=%p", device);
     free(device);
     return 0;
 }
@@ -716,7 +757,7 @@ static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
 
     for (i = 0; i < adev->num_dev_cfgs; i++)
 	supported |= adev->dev_cfgs[i].mask;
-
+    ALOGD("CALL adev_get_supported_devices adev=%p, supported=0x%x", adev, supported);
     return supported;
 }
 
@@ -733,19 +774,18 @@ static const struct {
     int mask;
     const char *name;
 } dev_names[] = {
-    { AUDIO_DEVICE_OUT_SPEAKER, "speaker" },
-    { AUDIO_DEVICE_OUT_WIRED_HEADSET | AUDIO_DEVICE_OUT_WIRED_HEADPHONE,
-      "headphone" },
-    { AUDIO_DEVICE_OUT_EARPIECE, "earpiece" },
-    { AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET, "analog-dock" },
-    { AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET, "digital-dock" },
+    { AUDIO_DEVICE_OUT_SPEAKER,						"speaker" },	 // 0x00000002
+    { AUDIO_DEVICE_OUT_WIRED_HEADSET | AUDIO_DEVICE_OUT_WIRED_HEADPHONE,"headphone" },	 // 0x00000004 | 0x00000008
+    { AUDIO_DEVICE_OUT_EARPIECE,					"earpiece" },	 // 0x00000001
+    { AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET,				"analog-dock" }, // 0x00000800
+    { AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET,				"digital-dock" },// 0x00001000
 
-    { AUDIO_DEVICE_IN_COMMUNICATION, "comms" },
-    { AUDIO_DEVICE_IN_AMBIENT, "ambient" },
-    { AUDIO_DEVICE_IN_BUILTIN_MIC, "builtin-mic" },
-    { AUDIO_DEVICE_IN_WIRED_HEADSET, "headset" },
-    { AUDIO_DEVICE_IN_AUX_DIGITAL, "digital" },
-    { AUDIO_DEVICE_IN_BACK_MIC, "back-mic" },
+    { AUDIO_DEVICE_IN_COMMUNICATION,					"comms" },	 // 0x80000001
+    { AUDIO_DEVICE_IN_AMBIENT,						"ambient" },	 // 0x80000002
+    { AUDIO_DEVICE_IN_BUILTIN_MIC,					"builtin-mic" }, // 0x80000004
+    { AUDIO_DEVICE_IN_WIRED_HEADSET,					"headset" },	 // 0x80000010
+    { AUDIO_DEVICE_IN_AUX_DIGITAL,					"digital" },	 // 0x80000020
+    { AUDIO_DEVICE_IN_BACK_MIC,						"back-mic" },	 // 0x80000080
 };
 
 static void adev_config_start(void *data, const XML_Char *elem,
@@ -773,7 +813,7 @@ static void adev_config_start(void *data, const XML_Char *elem,
 
 	for (i = 0; i < sizeof(dev_names) / sizeof(dev_names[0]); i++) {
 	    if (strcmp(dev_names[i].name, name) == 0) {
-		ALOGI("Allocating device %s\n", name);
+		ALOGI("Allocating device %s [0x%x]\n", name, dev_names[i].mask);
 		dev_cfg = realloc(s->adev->dev_cfgs,
 				  (s->adev->num_dev_cfgs + 1)
 				  * sizeof(*dev_cfg));
@@ -867,13 +907,8 @@ static void adev_config_end(void *data, const XML_Char *name)
 	    ALOGD("%d element on sequence\n", s->path_len);
 	    s->dev->on = s->path;
 	    s->dev->on_len = s->path_len;
-
 	} else {
 	    ALOGD("%d element off sequence\n", s->path_len);
-
-	    /* Apply it, we'll reenable anything that's wanted later */
-	    set_route_by_array(s->adev->mixer, s->path, s->path_len);
-
 	    s->dev->off = s->path;
 	    s->dev->off_len = s->path_len;
 	}
