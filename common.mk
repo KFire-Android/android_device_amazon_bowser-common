@@ -40,6 +40,10 @@ PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
     $(BOWSER_COMMON_FOLDER)/prebuilt/bu52061.kl:system/usr/keylayout/bu52061.kl
 
+# TinyHW XML route file for bowser
+PRODUCT_COPY_FILES += \
+    $(BOWSER_COMMON_FOLDER)/audio/tiny_hw.xml:/system/etc/sound/$(TARGET_BOOTLOADER_BOARD_NAME)
+
 # postrecoveryboot for recovery
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh

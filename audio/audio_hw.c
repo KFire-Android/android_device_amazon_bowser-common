@@ -932,7 +932,7 @@ static int adev_config_parse(struct tiny_audio_device *adev)
     bool eof = false;
     int len;
 
-    property_get("ro.product.device", property, "tiny_hw");
+    property_get("ro.product.board", property, "tiny_hw");
     snprintf(file, sizeof(file), "/system/etc/sound/%s", property);
 
     ALOGD("Reading configuration from %s\n", file);
