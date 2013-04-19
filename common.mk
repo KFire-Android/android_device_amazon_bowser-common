@@ -39,6 +39,10 @@ PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
     $(BOWSER_COMMON_FOLDER)/prebuilt/bu52061.kl:system/usr/keylayout/bu52061.kl
 
+# Prebuilts /system/etc/bluetooth
+PRODUCT_COPY_FILES += \
+    $(BOWSER_COMMON_FOLDER)/bluetooth/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf
+
 # audio config files for bowser
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/audio/audio_policy.conf:/system/etc/audio_policy.conf \
