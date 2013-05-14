@@ -1,0 +1,52 @@
+<mixer>
+	<!-- These are the initial mixer settings -->
+	<ctl name="DL1 Media Playback Volume" value="118" />
+	<ctl name="DL1 Voice Playback Volume" value="120" />
+	<ctl name="SDT DL Volume" value="120" />
+	<ctl name="Digital Playback Volume" value="95" />
+	<ctl name="Digital Capture Volume" value="0" />
+	<ctl name="Speaker Boost Volume" value="3" />
+	<ctl name="Headphone Aux Volume" value="7" />
+	<ctl name="MIXINR PGA Volume" value="7" />
+	<ctl name="AUDUL Voice UL Volume" value="120" />
+	<ctl name="Capture Volume" value="31" />
+	<ctl name="SDT UL Volume" value="101" />
+	<ctl name="Sidetone Mixer Capture" value="0" />
+	<ctl name="Headphone ZC Switch" value="1" />
+	<ctl name="Speaker ZC Switch" value="1" />
+	<ctl name="MUX_UL10" value="MMExt Left" />
+	<ctl name="MUX_UL11" value="MMExt Right" />
+	<ctl name="Capture Switch" value="1" />
+	<ctl name="MIXINR PGA Switch" value="1" />
+	<ctl name="INPGAR IN1R Switch" value="1" />
+	<ctl name="MIXINL PGA Switch" value="0" />
+	<ctl name="Sidetone Mixer Playback" value="1" />
+	<ctl name="DL1 MM_EXT Switch" value="1" />
+
+	<path name="speaker">
+		<ctl name="Speaker Volume" value="126" />
+		<ctl name="DL1 Mixer Multimedia" value="1" />
+		<ctl name="HP Switch" value="0" />
+		<ctl name="SPK Switch" value="1" />
+	</path>
+
+	<path name="headphone">
+		<ctl name="Headphone Volume" value="100" />
+		<ctl name="DL1 Mixer Multimedia" value="1" />
+		<ctl name="HP Switch" value="1" />
+		<ctl name="SPK Switch" value="0" />
+	</path>
+
+	<path name="builtin-mic">
+		<ctl name="MUX_UL10" value="MMExt Left" />
+		<ctl name="MUX_UL11" value="MMExt Right" />
+		<ctl name="DMICDAT Switch" value="1" />
+		<ctl name="DMIC1 UL Volume" value="146" />
+		<ctl name="Digital Capture Volume" value="112" />
+		<ctl name="Sidetone Mixer Capture" value="1" />
+	</path>
+
+	<path name="aux-digital-out">
+		<ctl name="DL1 Mixer Multimedia" value="1" />
+	</path>
+</mixer>

@@ -14,6 +14,11 @@ TI_OMAP4_CAMERAHAL_VARIANT := true
 #TI_CAMERAHAL_DEBUG_FUNCTION_NAMES := true
 USE_CAMERA_STUB := false
 
+# Audio
+BOARD_AUDIO_PCM_DEVICE_DEFAULT_OUT := 0
+BOARD_AUDIO_PCM_DEVICE_DEFAULT_IN := 2
+BOARD_AUDIO_OUT_SAMPLING_RATE := 44100
+
 # inherit from the proprietary version
 -include vendor/amazon/bowser-common/BoardConfigVendor.mk
 

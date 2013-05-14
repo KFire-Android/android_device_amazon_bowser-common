@@ -32,8 +32,10 @@ PRODUCT_PACKAGES += \
 
 # Prebuilts /system/etc
 PRODUCT_COPY_FILES += \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/audio_policy.conf:/system/etc/audio_policy.conf \
     $(BOWSER_COMMON_FOLDER)/prebuilt/media_codecs.xml:/system/etc/media_codecs.xml \
     $(BOWSER_COMMON_FOLDER)/prebuilt/media_profiles.xml:/system/etc/media_profiles.xml \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/mixer_paths.xml:/system/etc/mixer_paths.xml \
     $(BOWSER_COMMON_FOLDER)/prebuilt/vold.fstab:/system/etc/vold.fstab \
     $(BOWSER_COMMON_FOLDER)/prebuilt/smc_normal_world_android_cfg.ini:/system/etc/smc_normal_world_android_cfg.ini \
     $(BOWSER_COMMON_FOLDER)/prebuilt/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
@@ -42,11 +44,6 @@ PRODUCT_COPY_FILES += \
 # Prebuilts /system/etc/bluetooth
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/bluetooth/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf
-
-# audio config files for bowser
-PRODUCT_COPY_FILES += \
-    $(BOWSER_COMMON_FOLDER)/audio/audio_policy.conf:/system/etc/audio_policy.conf \
-    $(BOWSER_COMMON_FOLDER)/audio/tiny_hw.xml:/system/etc/sound/bowser
 
 # postrecoveryboot for recovery
 PRODUCT_COPY_FILES += \
