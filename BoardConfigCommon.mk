@@ -58,7 +58,6 @@ DOMX_PATH := $(BOWSER_COMMON_FOLDER)/domx
 BOARD_CREATE_AMAZON_HDCP_KEYS_SYMLINK := true
 
 # Recovery
-TARGET_RECOVERY_INITRC := $(BOWSER_COMMON_FOLDER)/recovery/init.recovery.rc
 TARGET_RECOVERY_PRE_COMMAND := "echo 0 > /sys/block/mmcblk0boot0/force_ro; echo -n 7 | dd of=/dev/block/mmcblk0boot0 bs=1 count=1 seek=4104 ; sync; \#"
 
 # TWRP Config
