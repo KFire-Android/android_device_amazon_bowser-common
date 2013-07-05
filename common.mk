@@ -30,6 +30,10 @@ PRODUCT_PACKAGES += \
     lib_driver_cmd_bcmdhd \
     libnetcmdiface
 
+# Permissions
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
+
 # Prebuilts /system/etc
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/prebuilt/audio_policy.conf:/system/etc/audio_policy.conf \
