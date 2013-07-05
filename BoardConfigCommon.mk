@@ -24,7 +24,7 @@ BOARD_AUDIO_OUT_SAMPLING_RATE := 44100
 
 # Kernel
 BOARD_KERNEL_PAGESIZE := 2048
-BOARD_KERNEL_CMDLINE := mem=1G console=/dev/null rootdelay=2 init=/init androidboot.console=ttyO2 androidboot.hardware=bowser vmalloc=496M
+BOARD_KERNEL_CMDLINE := mem=1G console=/dev/null rootdelay=2 init=/init androidboot.console=ttyO2 androidboot.hardware=bowser vmalloc=384M
 TARGET_BOOTLOADER_BOARD_NAME := bowser
 
 # Connectivity - Wi-Fi
