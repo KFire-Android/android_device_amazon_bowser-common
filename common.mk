@@ -49,10 +49,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/bluetooth/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf
 
-# postrecoveryboot for recovery
-PRODUCT_COPY_FILES += \
-    $(BOWSER_COMMON_FOLDER)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh
-
 # TI OMAP4
 PRODUCT_PACKAGES += \
     libdomx \
