@@ -17,7 +17,8 @@ PRODUCT_PACKAGES += \
     power.bowser \
     camera.bowser \
     audio.primary.bowser \
-    audio.hdmi.bowser
+    audio.hdmi.bowser \
+    audio.r_submix.default
 
 # BT
 PRODUCT_PACKAGES += \
