@@ -96,6 +96,18 @@ Only the three quirks included above are recognized at this point:
         <MediaCodec name="OMX.google.h263.decoder" type="video/3gpp" />
         <MediaCodec name="OMX.google.h264.decoder" type="video/avc" />
         <MediaCodec name="OMX.google.vpx.decoder" type="video/x-vnd.on2.vp8" />
+
+        <!-- DOLBY_DDPDEC51 -->
+        <MediaCodec name="OMX.dolby.ac3.decoder" >
+            <Type name="audio/ac3" />
+            <Quirk name="needs-flush-before-disable" />
+            <Quirk name="requires-flush-complete-emulation" />
+        </MediaCodec>
+        <MediaCodec name="OMX.dolby.ec3.decoder" >
+            <Type name="audio/eac3" />
+            <Quirk name="needs-flush-before-disable" />
+            <Quirk name="requires-flush-complete-emulation" />
+        </MediaCodec>
     </Decoders>
 
     <Encoders>
