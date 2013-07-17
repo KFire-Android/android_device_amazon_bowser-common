@@ -53,7 +53,7 @@ extern "C" {
 #include <OMX_IVCommon.h>
 #include <OMX_Image.h>
 
-#define DCC_PATH  "/data/misc/camera/"
+#define DCC_PATH  "/system/vendor/camera/"
 
 #define MAX_URI_LENGTH      (OMX_MAX_STRINGNAME_SIZE)
 #define MAX_ALGOAREAS       (35)
