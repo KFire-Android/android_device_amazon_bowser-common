@@ -75,7 +75,14 @@
 /* Incase of multiple instance, making sure DCC is initialized only for
    first instance */
 static OMX_S16 numofInstance = 0;
+int dcc_flag = 0;
 TIMM_OSAL_PTR cam_mutex = NULL;
+
+/* To store DCC buffer size */
+OMX_S32 dccbuf_size = 0;
+
+/* DCC buff accessors */
+MEMPLUGIN_BUFFER_ACCESSOR sDccBuffer;
 
 /* ===========================================================================*/
 /**
@@ -236,8 +243,20 @@ static OMX_ERRORTYPE ComponentPrivateDeInit(OMX_IN OMX_HANDLETYPE hComponent)
 
         MEMPLUGIN_BUFFER_PARAMS_INIT(delBuffer_params);
 	pCompPrv = (PROXY_COMPONENT_PRIVATE *) hComp->pComponentPrivate;
+        if (dcc_flag)
+        {
+            eOsalError =
+                TIMM_OSAL_MutexObtain(cam_mutex, TIMM_OSAL_SUSPEND);
+            if (eOsalError != TIMM_OSAL_ERR_NONE)
+            {
+                    TIMM_OSAL_Error("Mutex Obtain failed");
+            }
+            numofInstance = numofInstance - 1;
 
-
+            eOsalError = TIMM_OSAL_MutexRelease(cam_mutex);
+            PROXY_assert(eOsalError == TIMM_OSAL_ERR_NONE,
+                OMX_ErrorInsufficientResources, "Mutex release failed");
+        }
         OMX_CameraVtcFreeMemory(hComponent);
 
 
@@ -270,6 +289,8 @@ static OMX_ERRORTYPE Camera_SendCommand(OMX_IN OMX_HANDLETYPE hComponent,
 
 {
     OMX_ERRORTYPE eError = OMX_ErrorNone, eCompReturn;
+    static OMX_BOOL dcc_loaded = OMX_FALSE;
+    OMX_ERRORTYPE dcc_eError = OMX_ErrorNone;
     OMX_COMPONENTTYPE *hComp = (OMX_COMPONENTTYPE *) hComponent;
     PROXY_COMPONENT_PRIVATE *pCompPrv;
     OMX_PROXY_CAM_PRIVATE   *pCamPrv;
@@ -288,6 +309,26 @@ static OMX_ERRORTYPE Camera_SendCommand(OMX_IN OMX_HANDLETYPE hComponent,
         if (eError != OMX_ErrorNone) {
             DOMX_ERROR("DOMX: _OMX_CameraVtcAllocateMemory completed with error 0x%x\n", eError);
             goto EXIT;
+        }
+        if (!dcc_loaded)
+        {
+            dcc_eError = DCC_Init(hComponent);
+            if (dcc_eError != OMX_ErrorNone)
+            {
+                DOMX_ERROR(" Error in DCC Init");
+            }
+            /* Configure Ducati to use DCC buffer from A9 side
+             *ONLY* if DCC_Init is successful. */
+            if (dcc_eError == OMX_ErrorNone)
+            {
+                dcc_eError = send_DCCBufPtr(hComponent);
+                if (dcc_eError != OMX_ErrorNone)
+                {
+                    DOMX_ERROR(" Error in Sending DCC Buf ptr");
+                }
+                DCC_DeInit(hComponent);
+            }
+            dcc_loaded = OMX_TRUE;
         }
     } else if (eCmd == OMX_CommandPortDisable) {
         int i, j;
@@ -554,6 +595,295 @@ OMX_ERRORTYPE OMX_ComponentInit(OMX_HANDLETYPE hComponent)
       EXIT:
 	return eError;
 }
+
+/* ===========================================================================*/
+/**
+ * @name DCC_Init()
+ * @brief
+ * @param void
+ * @return OMX_ErrorNone = Successful
+ * @sa TBD
+ *
+ */
+/* ===========================================================================*/
+OMX_ERRORTYPE DCC_Init(OMX_HANDLETYPE hComponent)
+{
+       OMX_TI_PARAM_DCCURIINFO param;
+       OMX_PTR ptempbuf;
+       OMX_U16 nIndex = 0;
+       OMX_ERRORTYPE eError = OMX_ErrorNone;
+       PROXY_COMPONENT_PRIVATE *pComponentPrivate;
+       OMX_COMPONENTTYPE *pHandle = NULL;
+       MEMPLUGIN_BUFFER_PARAMS sDccBuff_params;
+       MEMPLUGIN_BUFFER_PROPERTIES sDccBuff_prop;
+       MEMPLUGIN_ERRORTYPE eMemError = MEMPLUGIN_ERROR_NONE;
+       OMX_S32 status = 0;
+       OMX_STRING dcc_dir[200];
+       OMX_U16 i;
+       _PROXY_OMX_INIT_PARAM(&param, OMX_TI_PARAM_DCCURIINFO);
+
+       DOMX_ENTER("ENTER");
+       pHandle = (OMX_COMPONENTTYPE *) hComponent;
+       pComponentPrivate = (PROXY_COMPONENT_PRIVATE *)pHandle->pComponentPrivate;
+       if(pComponentPrivate == NULL)
+       {
+              eError = OMX_ErrorBadParameter;
+              DOMX_ERROR("%s: Component private data NULL",__FUNCTION__);
+              goto EXIT;
+       }
+       /* Read the the DCC URI info */
+       for (nIndex = 0; eError != OMX_ErrorNoMore; nIndex++)
+       {
+               param.nIndex = nIndex;
+               eError =
+                       OMX_GetParameter(hComponent,
+                       OMX_TI_IndexParamDccUriInfo, &param);
+
+               PROXY_assert((eError == OMX_ErrorNone) ||
+                       (eError == OMX_ErrorNoMore), eError,
+                       "Error in GetParam for Dcc URI info");
+
+               if (eError == OMX_ErrorNone)
+               {
+                       DOMX_DEBUG("DCC URI's %s ", param.sDCCURI);
+                       dcc_dir[nIndex] =
+                               TIMM_OSAL_Malloc(sizeof(OMX_U8) *
+                               (strlen(DCC_PATH) + MAX_URI_LENGTH + 1),
+                               TIMM_OSAL_TRUE, 0, TIMMOSAL_MEM_SEGMENT_INT);
+                       PROXY_assert(dcc_dir[nIndex] != NULL,
+                               OMX_ErrorInsufficientResources, "Malloc failed");
+                       strcpy(dcc_dir[nIndex], DCC_PATH);
+                       strncat(dcc_dir[nIndex], (OMX_STRING) param.sDCCURI, MAX_URI_LENGTH);
+                       strcat(dcc_dir[nIndex], "/");
+               }
+       }
+
+       /* setting  back errortype OMX_ErrorNone */
+       if (eError == OMX_ErrorNoMore)
+       {
+               eError = OMX_ErrorNone;
+       }
+
+       dccbuf_size = read_DCCdir(NULL, dcc_dir, nIndex);
+
+    if(dccbuf_size <= 0)
+    {
+           DOMX_DEBUG("No DCC files found, switching back to default DCC");
+        return OMX_ErrorInsufficientResources;
+    }
+    if(pComponentPrivate->pMemPluginHandle == NULL)
+    {
+                eMemError = MemPlugin_Init("MEMPLUGIN_ION",&(pComponentPrivate->pMemPluginHandle));
+                if(eMemError != MEMPLUGIN_ERROR_NONE)
+                {
+                     DOMX_ERROR("MEMPLUGIN configure step failed");
+                     eError = OMX_ErrorUndefined;
+                     goto EXIT;
+                }
+     }
+       pComponentPrivate->bMapBuffers = OMX_TRUE;
+
+       eMemError = MemPlugin_Open(pComponentPrivate->pMemPluginHandle,&(pComponentPrivate->nMemmgrClientDesc));
+       if(eMemError != MEMPLUGIN_ERROR_NONE)
+       {
+               DOMX_ERROR("Mem manager client creation failed!!!");
+               eError = OMX_ErrorInsufficientResources;
+               goto EXIT;
+       }
+       dccbuf_size = (dccbuf_size + LINUX_PAGE_SIZE -1) & ~(LINUX_PAGE_SIZE - 1);
+       MEMPLUGIN_BUFFER_PARAMS_INIT(sDccBuff_params);
+       sDccBuff_params.nWidth = dccbuf_size;
+       sDccBuff_params.bMap = pComponentPrivate->bMapBuffers;
+       eMemError = MemPlugin_Alloc(pComponentPrivate->pMemPluginHandle,pComponentPrivate->nMemmgrClientDesc,&sDccBuff_params,&sDccBuff_prop);
+       sDccBuffer.pBufferHandle = sDccBuff_prop.sBuffer_accessor.pBufferHandle;
+       sDccBuffer.pBufferMappedAddress = sDccBuff_prop.sBuffer_accessor.pBufferMappedAddress;
+       sDccBuffer.bufferFd = sDccBuff_prop.sBuffer_accessor.bufferFd;
+       ptempbuf = sDccBuffer.pBufferMappedAddress;
+       dccbuf_size = read_DCCdir(ptempbuf, dcc_dir, nIndex);
+       PROXY_assert(dccbuf_size > 0, OMX_ErrorInsufficientResources,
+               "ERROR in copy DCC files into buffer");
+EXIT:
+       for (i = 0; i < nIndex - 1; i++)
+       {
+                       TIMM_OSAL_Free(dcc_dir[i]);
+       }
+
+       return eError;
+
+}
+
+/* ===========================================================================*/
+/**
+ * @name send_DCCBufPtr()
+ * @brief : Sending the DCC uri buff addr to ducati
+ * @param void
+ * @return return = 0 is successful
+ * @sa TBD
+ *
+ */
+/* ===========================================================================*/
+
+OMX_ERRORTYPE send_DCCBufPtr(OMX_HANDLETYPE hComponent)
+{
+       OMX_TI_CONFIG_SHAREDBUFFER uribufparam;
+       OMX_ERRORTYPE eError = OMX_ErrorNone;
+       PROXY_COMPONENT_PRIVATE *pComponentPrivate;
+       OMX_COMPONENTTYPE *pHandle = NULL;
+
+       _PROXY_OMX_INIT_PARAM(&uribufparam, OMX_TI_CONFIG_SHAREDBUFFER);
+       uribufparam.nPortIndex = OMX_ALL;
+
+       DOMX_ENTER("ENTER");
+       pHandle = (OMX_COMPONENTTYPE *) hComponent;
+       pComponentPrivate = (PROXY_COMPONENT_PRIVATE *)pHandle->pComponentPrivate;
+       uribufparam.nSharedBuffSize = dccbuf_size;
+if(pComponentPrivate->bMapBuffers)
+       uribufparam.pSharedBuff = (OMX_PTR) sDccBuffer.bufferFd;
+else
+       uribufparam.pSharedBuff = sDccBuffer.pBufferHandle;
+
+       DOMX_DEBUG("SYSLINK MAPPED ADDR:  0x%x sizeof buffer %d",
+               uribufparam.pSharedBuff, uribufparam.nSharedBuffSize);
+
+       eError = __PROXY_SetParameter(hComponent,
+                                                               OMX_TI_IndexParamDccUriBuffer,
+                                                               &uribufparam,
+                                                               &(uribufparam.pSharedBuff), 1);
+
+       if (eError != OMX_ErrorNone) {
+               DOMX_ERROR(" Error in SetParam for DCC Uri Buffer 0x%x", eError);
+       }
+
+       DOMX_EXIT("EXIT");
+       return eError;
+}
+
+/* ===========================================================================*/
+/**
+ * @name read_DCCdir()
+ * @brief : copies all the dcc profiles into the allocated 1D-Tiler buffer
+ *          and returns the size of the buffer.
+ * @param void : OMX_PTR is null then returns the size of the DCC directory
+ * @return return = size of the DCC directory or error in case of any failures
+ *                 in file read or open
+ * @sa TBD
+ *
+ */
+/* ===========================================================================*/
+OMX_S32 read_DCCdir(OMX_PTR buffer, OMX_STRING * dir_path, OMX_U16 numofURI)
+{
+       FILE *pFile;
+       OMX_S32 lSize;
+       OMX_S32 dcc_buf_size = 0;
+       size_t result;
+       OMX_STRING filename;
+       char temp[200];
+       OMX_STRING dotdot = "..";
+       DIR *d;
+       struct dirent *dir;
+       OMX_U16 i = 0;
+       OMX_S32 ret = 0;
+
+       DOMX_ENTER("ENTER");
+       for (i = 0; i < numofURI - 1; i++)
+       {
+               d = opendir(dir_path[i]);
+               if (d)
+               {
+                       /* read each filename */
+                       while ((dir = readdir(d)) != NULL)
+                       {
+                               filename = dir->d_name;
+                               strcpy(temp, dir_path[i]);
+                               strcat(temp, filename);
+                               if ((*filename != *dotdot))
+                               {
+                                       DOMX_DEBUG
+                                           ("\n\t DCC Profiles copying into buffer => %s mpu_addr: %p",
+                                           temp, buffer);
+                                       pFile = fopen(temp, "rb");
+                                       if (pFile == NULL)
+                                       {
+                                               DOMX_ERROR("File open error");
+                                               ret = -1;
+                                       } else
+                                       {
+                                               fseek(pFile, 0, SEEK_END);
+                                               lSize = ftell(pFile);
+                                               rewind(pFile);
+                                               /* buffer is not NULL then copy all the DCC profiles into buffer
+                                                  else return the size of the DCC directory */
+                                               if (buffer)
+                                               {
+                                                       // copy file into the buffer:
+                                                       result =
+                                                           fread(buffer, 1,
+                                                           lSize, pFile);
+                                                       if (result != (size_t) lSize)
+                                                       {
+                                                               DOMX_ERROR
+                                                                   ("fread: Reading error");
+                                                               ret = -1;
+                                                       }
+                                                       buffer =
+                                                           buffer + lSize;
+                                               }
+                                               /* getting the size of the total dcc files available in FS */
+                                               dcc_buf_size =
+                                                   dcc_buf_size + lSize;
+                                               // terminate
+                                               fclose(pFile);
+                                       }
+                               }
+                       }
+                       closedir(d);
+               }
+       }
+       if (ret == 0)
+               ret = dcc_buf_size;
+
+       DOMX_EXIT("return %d", ret);
+       return ret;
+}
+
+/* ===========================================================================*/
+/**
+ * @name DCC_Deinit()
+ * @brief
+ * @param hComponent: OMX_HANDLETYPE
+ * @return void
+ * @sa TBD
+ *
+ */
+/* ===========================================================================*/
+void DCC_DeInit(OMX_HANDLETYPE hComponent)
+{
+       OMX_S16 status;
+       MEMPLUGIN_BUFFER_PARAMS sDccBuff_params;
+       MEMPLUGIN_BUFFER_PROPERTIES sDccBuff_prop;
+       PROXY_COMPONENT_PRIVATE *pComponentPrivate;
+       OMX_COMPONENTTYPE *pHandle = NULL;
+
+       DOMX_ENTER("ENTER");
+       pHandle = (OMX_COMPONENTTYPE *) hComponent;
+       pComponentPrivate = (PROXY_COMPONENT_PRIVATE *)pHandle->pComponentPrivate;
+       if (sDccBuffer.pBufferHandle)
+       {
+               MEMPLUGIN_BUFFER_PARAMS_INIT(sDccBuff_params);
+               sDccBuff_prop.sBuffer_accessor.pBufferHandle = sDccBuffer.pBufferHandle;
+               sDccBuff_prop.sBuffer_accessor.pBufferMappedAddress = sDccBuffer.pBufferMappedAddress;
+               sDccBuff_prop.sBuffer_accessor.pRegBufferHandle = sDccBuffer.pRegBufferHandle;
+               sDccBuff_params.nWidth = dccbuf_size;
+               MemPlugin_Free(pComponentPrivate->pMemPluginHandle,pComponentPrivate->nMemmgrClientDesc,&sDccBuff_params,&sDccBuff_prop);
+               sDccBuffer.pBufferHandle = NULL;
+               sDccBuffer.bufferFd = -1;
+               sDccBuffer.pBufferMappedAddress = NULL;
+       }
+
+       DOMX_EXIT("EXIT");
+}
+
+
 
 /*===============================================================*/
 /** @fn Cam_Setup : This function is called when the the OMX Camera library is
