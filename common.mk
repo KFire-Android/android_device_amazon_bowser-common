@@ -36,6 +36,7 @@ PRODUCT_COPY_FILES += \
 
 # Prebuilts /system/etc
 PRODUCT_COPY_FILES += \
+    $(BOWSER_COMMON_FOLDER)/prebuilt/audio_effects.conf:/system/vendor/etc/audio_effects.conf \
     $(BOWSER_COMMON_FOLDER)/prebuilt/audio_policy.conf:/system/etc/audio_policy.conf \
     $(BOWSER_COMMON_FOLDER)/prebuilt/media_codecs.xml:/system/etc/media_codecs.xml \
     $(BOWSER_COMMON_FOLDER)/prebuilt/media_profiles.xml:/system/etc/media_profiles.xml \
