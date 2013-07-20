@@ -107,7 +107,7 @@ typedef enum OMX_AUDIO_CODINGTYPE {
     OMX_AUDIO_CodingRA,          /**< Any variant of RA encoded data */
     OMX_AUDIO_CodingMIDI,        /**< Any variant of MIDI encoded data */
     OMX_AUDIO_CodingFLAC,        /**< Any variant of FLAC encoded data */
-#ifdef OMAP_ENHANCEMENT //DOLBY_DDPDEC51
+#ifdef OMAP_ENHANCEMENT_DOLBY_DDPDEC51_MULTICHANNEL
     OMX_AUDIO_CodingDDP,         /**< Any variant of DDP encoded data */
 #endif
     OMX_AUDIO_CodingKhronosExtensions = 0x6F000000, /**< Reserved region for introducing Khronos Standard Extensions */
