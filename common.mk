@@ -5,11 +5,6 @@ $(call inherit-product, $(COMMON_FOLDER)/common.mk)
 
 DEVICE_PACKAGE_OVERLAYS += $(BOWSER_COMMON_FOLDER)/overlay/aosp
 
-PRODUCT_AAPT_PREF_CONFIG := hdpi
-
-
-#    audio.primary.bowser \
-#    audio.hdmi.bowser
 # Hardware HALs
 PRODUCT_PACKAGES += \
     hwcomposer.bowser \
