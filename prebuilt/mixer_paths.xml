@@ -31,7 +31,7 @@
 	</path>
 
 	<path name="headphone">
-		<ctl name="Headphone Volume" value="100" />
+		<ctl name="Headphone Volume" value="114" />
 		<ctl name="DL1 Mixer Multimedia" value="1" />
 		<ctl name="HP Switch" value="1" />
 		<ctl name="SPK Switch" value="0" />
