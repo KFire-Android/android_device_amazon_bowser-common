@@ -3,6 +3,9 @@ BOWSER_COMMON_FOLDER := device/amazon/bowser-common
 # inherit from common
 -include device/amazon/omap4-common/BoardConfigCommon.mk
 
+# Sensors
+BOARD_USES_GENERIC_INVENSENSE := false
+
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
