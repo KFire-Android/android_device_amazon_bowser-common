@@ -25,6 +25,13 @@ PRODUCT_PACKAGES += \
     lib_driver_cmd_bcmdhd \
     libnetcmdiface
 
+# Sensors
+PRODUCT_PACKAGES += \
+    sensors.omap4 \
+    libinvensense_hal \
+    libmllite \
+    libmplmpu \
+
 # Permissions
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
