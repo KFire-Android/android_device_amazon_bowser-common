@@ -67,6 +67,10 @@ PRODUCT_PACKAGES += \
     tf_daemon \
     libtf_crypto_sst
 
+# TWRP
+PRODUCT_COPY_FILES += \
+    $(BOWSER_COMMON_FOLDER)/twrp.fstab:recovery/root/etc/twrp.fstab
+
 # Dalvik VM settings
 PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.heapstartsize=8m \
