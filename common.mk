@@ -73,13 +73,4 @@ PRODUCT_PACKAGES += \
     tf_daemon \
     libtf_crypto_sst
 
-# Dalvik VM settings
-PRODUCT_PROPERTY_OVERRIDES += \
-    dalvik.vm.heapstartsize=8m \
-    dalvik.vm.heapgrowthlimit=64m \
-    dalvik.vm.heapsize=256m \
-    dalvik.vm.heaptargetutilization=0.75 \
-    dalvik.vm.heapminfree=2m \
-    dalvik.vm.heapmaxfree=8m
-
 $(call inherit-product-if-exists, vendor/amazon/bowser-common/bowser-common-vendor.mk)
