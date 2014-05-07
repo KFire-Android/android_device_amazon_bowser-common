@@ -76,3 +76,7 @@ TW_CUSTOM_BATTERY_PATH := /sys/class/power_supply/bq27541
 
 # ICS ril version
 LEGACY_RIL := true
+
+# hack the ota
+TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT := ./$(COMMON_FOLDER)/releasetools/bowser_ota_from_target_files
+TARGET_RELEASETOOL_IMG_FROM_TARGET_SCRIPT := ./$(COMMON_FOLDER)/releasetools/bowser_img_from_target_files
