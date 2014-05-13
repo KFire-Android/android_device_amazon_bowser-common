@@ -55,26 +55,4 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/twrp.fstab:recovery/root/etc/twrp.fstab
 
-# TI OMAP4
-PRODUCT_PACKAGES += \
-    libdomx \
-    libOMX_Core \
-    libOMX.TI.DUCATI1.VIDEO.H264E \
-    libOMX.TI.DUCATI1.VIDEO.H264SVCE \
-    libOMX.TI.DUCATI1.VIDEO.VC1E \
-    libOMX.TI.DUCATI1.VIDEO.MPEG4E \
-    libOMX.TI.DUCATI1.VIDEO.DECODER \
-    libOMX.TI.DUCATI1.VIDEO.DECODER.secure \
-    libOMX.TI.DUCATI1.VIDEO.CAMERA \
-    libOMX.TI.DUCATI1.MISC.SAMPLE \
-    libstagefrighthw \
-    libI420colorconvert \
-    libtiutils_custom \
-    libcamera \
-    libion_ti \
-    libomxcameraadapter \
-    smc_pa_ctrl \
-    tf_daemon \
-    libtf_crypto_sst
-
 $(call inherit-product-if-exists, vendor/amazon/bowser-common/bowser-common-vendor.mk)
