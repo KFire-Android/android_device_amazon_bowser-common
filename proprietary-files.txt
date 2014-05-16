@@ -24,7 +24,6 @@
 
 # Bins
 bin/battery_log.sh
-bin/bbx
 bin/cond_start_ril
 bin/emmc_init.sh
 bin/temperature_log.sh
