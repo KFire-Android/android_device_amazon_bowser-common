@@ -56,12 +56,10 @@ BOARD_CREATE_AMAZON_HDCP_KEYS_SYMLINK := true
 TARGET_RECOVERY_PRE_COMMAND := "echo 0 > /sys/block/mmcblk0boot0/force_ro; echo -n 7 | dd of=/dev/block/mmcblk0boot0 bs=1 count=1 seek=4104 ; sync; \#"
 
 # TWRP Config
-TW_INTERNAL_STORAGE_PATH := "/data/media"
+TW_INTERNAL_STORAGE_PATH := "/data/media/0"
 TW_INTERNAL_STORAGE_MOUNT_POINT := "data"
 BOARD_HAS_NO_REAL_SDCARD := true
 RECOVERY_SDCARD_ON_DATA := true
-TARGET_USERIMAGES_USE_EXT4 := true
-TW_CUSTOM_POWER_BUTTON := 107
 TW_MAX_BRIGHTNESS := 254
 TW_CUSTOM_BATTERY_PATH := /sys/class/power_supply/bq27541
 

@@ -50,8 +50,4 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/bluetooth/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf
 
-# Recovery
-PRODUCT_COPY_FILES += \
-    $(BOWSER_COMMON_FOLDER)/twrp.fstab:recovery/root/etc/twrp.fstab
-
 $(call inherit-product-if-exists, vendor/amazon/bowser-common/bowser-common-vendor.mk)
