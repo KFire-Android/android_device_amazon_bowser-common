@@ -26,6 +26,15 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.camera.sound.forced=0 \
     ro.camera.video_size=1280x720
 
+# Dalvik VM settings
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.heapstartsize=8m \
+    dalvik.vm.heapgrowthlimit=128m \
+    dalvik.vm.heapsize=384m \
+    dalvik.vm.heaptargetutilization=0.75 \
+    dalvik.vm.heapminfree=2m \
+    dalvik.vm.heapmaxfree=8m
+
 # BT
 PRODUCT_PACKAGES += \
     uim-sysfs \
