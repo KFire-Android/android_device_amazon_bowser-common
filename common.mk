@@ -15,6 +15,17 @@ PRODUCT_PACKAGES += \
     audio.hdmi.bowser \
     audio.r_submix.default
 
+# Device settings
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.demo.hdmirotationlock=true \
+    persist.lab126.touchnoisereject=1 \
+    ro.nf.profile=2 \
+    ro.nf.level=512 \
+    omap.audio.power=PingPong \
+    dolby.audio.sink.info=speaker \
+    ro.camera.sound.forced=0 \
+    ro.camera.video_size=1280x720
+
 # BT
 PRODUCT_PACKAGES += \
     uim-sysfs \
