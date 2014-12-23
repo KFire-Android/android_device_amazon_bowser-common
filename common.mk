@@ -44,9 +44,7 @@ PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/prebuilt/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
     $(BOWSER_COMMON_FOLDER)/prebuilt/usr/idc/AtmelTouch.idc:system/usr/idc/AtmelTouch.idc \
     $(BOWSER_COMMON_FOLDER)/prebuilt/usr/idc/cyttsp4-i2c.idc:system/usr/idc/cyttsp4-i2c.idc \
-    $(BOWSER_COMMON_FOLDER)/prebuilt/usr/keylayout/bu52061.kl:system/usr/keylayout/bu52061.kl \
     $(BOWSER_COMMON_FOLDER)/prebuilt/usr/keylayout/gpio-keys.kl:system/usr/keylayout/gpio-keys.kl\
-    $(BOWSER_COMMON_FOLDER)/prebuilt/usr/keylayout/twl6030_pwrbutton.kl:system/usr/keylayout/twl6030_pwrbutton.kl \
     $(BOWSER_COMMON_FOLDER)/prebuilt/vendor/etc/audio_effects.conf:/system/vendor/etc/audio_effects.conf
 
 # Prebuilts /system/etc/bluetooth
