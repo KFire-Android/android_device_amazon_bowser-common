@@ -20,11 +20,6 @@ PRODUCT_PACKAGES += \
     uim-sysfs \
     libbt-vendor
 
-# Wifi
-PRODUCT_PACKAGES += \
-    lib_driver_cmd_bcmdhd \
-    libnetcmdiface
-
 # Sensors
 PRODUCT_PACKAGES += \
     sensors.omap4 \
