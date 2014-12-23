@@ -89,33 +89,33 @@ static struct sensor_t sSensorList[] =
 {
     {"MPL Gyroscope", "Invensense", 1,
      SENSORS_GYROSCOPE_HANDLE,
-     SENSOR_TYPE_GYROSCOPE, 2000.0f, 1.0f, 0.5f, 10000, 0, 0, {}},
+     SENSOR_TYPE_GYROSCOPE, 2000.0f, 1.0f, 0.5f, 10000, 0, 0, 0, 0, 0, 0, {}},
     {"MPL Raw Gyroscope", "Invensense", 1,
      SENSORS_RAW_GYROSCOPE_HANDLE,
-     SENSOR_TYPE_GYROSCOPE, 2000.0f, 1.0f, 0.5f, 10000, 0, 0, {}},
+     SENSOR_TYPE_GYROSCOPE, 2000.0f, 1.0f, 0.5f, 10000, 0, 0, 0, 0, 0, 0, {}},
     {"MPL Accelerometer", "Invensense", 1,
      SENSORS_ACCELERATION_HANDLE,
-     SENSOR_TYPE_ACCELEROMETER, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, {}},
+     SENSOR_TYPE_ACCELEROMETER, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, 0, 0, 0, 0, {}},
     {"MPL Magnetic Field", "Invensense", 1,
      SENSORS_MAGNETIC_FIELD_HANDLE,
-     SENSOR_TYPE_MAGNETIC_FIELD, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, {}},
+     SENSOR_TYPE_MAGNETIC_FIELD, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, 0, 0, 0, 0, {}},
     {"MPL Orientation", "Invensense", 1,
      SENSORS_ORIENTATION_HANDLE,
-     SENSOR_TYPE_ORIENTATION, 360.0f, 1.0f, 9.7f, 10000, 0, 0, {}},
+     SENSOR_TYPE_ORIENTATION, 360.0f, 1.0f, 9.7f, 10000, 0, 0, 0, 0, 0, 0, {}},
     {"MPL Rotation Vector", "Invensense", 1,
      SENSORS_ROTATION_VECTOR_HANDLE,
-     SENSOR_TYPE_ROTATION_VECTOR, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, {}},
+     SENSOR_TYPE_ROTATION_VECTOR, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, 0, 0, 0, 0, {}},
     {"MPL Linear Acceleration", "Invensense", 1,
      SENSORS_LINEAR_ACCEL_HANDLE,
-     SENSOR_TYPE_LINEAR_ACCELERATION, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, {}},
+     SENSOR_TYPE_LINEAR_ACCELERATION, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, 0, 0, 0, 0, {}},
     {"MPL Gravity", "Invensense", 1,
      SENSORS_GRAVITY_HANDLE,
-     SENSOR_TYPE_GRAVITY, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, {}},
+     SENSOR_TYPE_GRAVITY, 10240.0f, 1.0f, 0.5f, 10000, 0, 0, 0, 0, 0, 0, {}},
 
 #ifdef ENABLE_DMP_SCREEN_AUTO_ROTATION
     {"MPL Screen Orientation", "Invensense ", 1,
      SENSORS_SCREEN_ORIENTATION_HANDLE,
-     SENSOR_TYPE_SCREEN_ORIENTATION, 100.0f, 1.0f, 1.1f, 0, 0, 0, {}},
+     SENSOR_TYPE_SCREEN_ORIENTATION, 100.0f, 1.0f, 1.1f, 0, 0, 0, 0, 0, 0, 0, {}},
 #endif
 };
 
@@ -877,21 +877,21 @@ int MPLSensor::enableQuaternionData(int en)
     return res;
 }
 
-int MPLSensor::enableTap(int en)
+int MPLSensor::enableTap(int /*en*/)
 {
     VFUNC_LOG;
 
     return 0;
 }
 
-int MPLSensor::enableFlick(int en)
+int MPLSensor::enableFlick(int /*en*/)
 {
     VFUNC_LOG;
 
     return 0;
 }
 
-int MPLSensor::enablePedometer(int en)
+int MPLSensor::enablePedometer(int /*en*/)
 {
     VFUNC_LOG;
 
@@ -1010,7 +1010,7 @@ int MPLSensor::enableOneSensor(int en, const char *name, int (MPLSensor::*enable
     return (this->*enabler)(en);
 }
 
-int MPLSensor::enableSensors(unsigned long sensors, int en, uint32_t changed) {
+int MPLSensor::enableSensors(unsigned long sensors, int /*en*/, uint32_t changed) {
     VFUNC_LOG;
 
     inv_error_t res = -1;
@@ -1500,16 +1500,11 @@ int MPLSensor::setDelay(int32_t handle, int64_t ns)
     LOGV_IF(PROCESS_VERBOSE, "setDelay : %llu ns, (%.2f Hz)", ns, 1000000000.f / ns);
 
     // limit all rates to reasonable ones */
-/*
-    if (ns < 10000000LL) {
-        ns = 10000000LL;
-    }
-*/
     if (ns < 5000000LL) {
         ns = 5000000LL;
     }
 
-    /* store request rate to mDelays arrary for each sensor */
+    /* store request rate to mDelays array for each sensor */
     mDelays[what] = ns;
 
     switch (what) {
@@ -1758,7 +1753,7 @@ int MPLSensor::update_delay() {
 
 /* For Third Party Accel Input Subsystem Drivers only */
 /* TODO: FIX! data is not used and count not decremented, results is hardcoded to 0 */
-int MPLSensor::readAccelEvents(sensors_event_t* data, int count)
+int MPLSensor::readAccelEvents(sensors_event_t* /*data*/, int count)
 {
     VHANDLER_LOG;
 
@@ -1859,7 +1854,7 @@ int MPLSensor::executeOnData(sensors_event_t* data, int count)
 /* TODO: This should probably be called "void cacheEvents(void)"
  * And executeOnData() should be int readEvents(data,count)
  */
-int MPLSensor::readEvents(sensors_event_t *data, int count) {
+int MPLSensor::readEvents(sensors_event_t* /*data*/, int /*count*/) {
 
 
     int lp_quaternion_on = 0, nbyte;
@@ -1910,7 +1905,7 @@ int MPLSensor::readEvents(sensors_event_t *data, int count) {
 #endif
 
     if (rsize < (nbyte - 8)) {
-        LOGE("HAL:ERR Full data packet was not read. rsize=%ld nbyte=%d sensors=%d errno=%d(%s)",
+        LOGE("HAL:ERR Full data packet was not read. rsize=%zd nbyte=%d sensors=%d errno=%d(%s)",
              rsize, nbyte, sensors, errno, strerror(errno));
         return -1;
     }
@@ -2032,7 +2027,7 @@ int MPLSensor::readEvents(sensors_event_t *data, int count) {
 }
 
 /* use for both MPUxxxx and third party compass */
-int MPLSensor::readCompassEvents(sensors_event_t *data, int count)
+int MPLSensor::readCompassEvents(sensors_event_t* /*data*/, int count)
 {
     VHANDLER_LOG;
 
@@ -2152,7 +2147,7 @@ int MPLSensor::enableDmpOrientation(int en)
         //Enable DMP orientation
         if (write_sysfs_int(mpu.display_orientation_on, en) < 0) {
             LOGE("HAL:ERR can't enable Android orientation");
-            res = -1;	// indicate an err
+            res = -1; // indicate an err
         }
 
         // open DMP Orient Fd

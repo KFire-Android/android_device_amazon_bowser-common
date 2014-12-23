@@ -50,7 +50,7 @@ public:
     virtual int64_t getDelay(int32_t handle);
 
     // unnecessary for MPL
-    virtual int readEvents(sensors_event_t *data, int count) { return 0; }
+    virtual int readEvents(sensors_event_t* /*data*/, int /*count*/) { return 0; }
 
     int readSample(long *data, int64_t *timestamp);
     int providesCalibration() { return 0; }
@@ -115,4 +115,3 @@ private:
 /*****************************************************************************/
 
 #endif  // COMPASS_SENSOR_H
-

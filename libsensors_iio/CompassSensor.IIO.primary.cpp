@@ -62,7 +62,7 @@
 #   define COMPASS_NAME                 "AKM8975"
 #endif
 
-/******************************************************************************/
+/*****************************************************************************/
 
 CompassSensor::CompassSensor()
                   : SensorBase(COMPASS_NAME, NULL),
@@ -120,7 +120,7 @@ CompassSensor::CompassSensor()
     fptr = fopen(compassSysFs.compass_orient, "r");
     if (fptr != NULL) {
         int om[9];
-        fscanf(fptr, "%d,%d,%d,%d,%d,%d,%d,%d,%d",
+        fscanf(fptr, "%d,%d,%d,%d,%d,%d,%d,%d,%d", 
                &om[0], &om[1], &om[2], &om[3], &om[4], &om[5],
                &om[6], &om[7], &om[8]);
         fclose(fptr);
@@ -282,11 +282,11 @@ int CompassSensor::getFd() const
  *  @param[in]    handle
  *                  which sensor to enable/disable.
  *  @param[in]    en
- *                  en=1, enable;
+ *                  en=1, enable; 
  *                  en=0, disable
  *  @return       if the operation is successful.
  */
-int CompassSensor::enable(int32_t handle, int en)
+int CompassSensor::enable(int32_t /*handle*/, int en) 
 {
     VFUNC_LOG;
 
@@ -361,13 +361,13 @@ int CompassSensor::masterEnable(int en) {
     return res;
 }
 
-int CompassSensor::setDelay(int32_t handle, int64_t ns)
+int CompassSensor::setDelay(int32_t /*handle*/, int64_t ns) 
 {
     VFUNC_LOG;
     int tempFd;
     int res;
 
-    LOGV_IF(SYSFS_VERBOSE, "HAL:sysfs:echo %.0f > %s (%lld)",
+    LOGV_IF(SYSFS_VERBOSE, "HAL:sysfs:echo %.0f > %s (%lld)", 
             1000000000.f / ns, compassSysFs.compass_rate, getTimestamp());
     mDelay = ns;
     if (ns == 0)
@@ -380,11 +380,12 @@ int CompassSensor::setDelay(int32_t handle, int64_t ns)
     return res;
 }
 
+
 /**
     @brief      This function will return the state of the sensor.
     @return     1=enabled; 0=disabled
 **/
-int CompassSensor::getEnable(int32_t handle)
+int CompassSensor::getEnable(int32_t /*handle*/)
 {
     VFUNC_LOG;
     return mEnable;
@@ -410,8 +411,8 @@ void CompassSensor::processCompassEvent(const input_event *event)
         mCachedCompassData[2] = event->value;
         break;
     }
-
-    mCompassTimestamp =
+    
+    mCompassTimestamp = 
         (int64_t)event->time.tv_sec * 1000000000L + event->time.tv_usec * 1000L;
 }
 
@@ -426,7 +427,7 @@ long CompassSensor::getSensitivity()
     VFUNC_LOG;
 
     long sensitivity;
-    LOGV_IF(SYSFS_VERBOSE, "HAL:sysfs:cat %s (%lld)",
+    LOGV_IF(SYSFS_VERBOSE, "HAL:sysfs:cat %s (%lld)", 
             compassSysFs.compass_scale, getTimestamp());
     inv_read_data(compassSysFs.compass_scale, &sensitivity);
     return sensitivity;
@@ -469,9 +470,9 @@ int CompassSensor::readSample(long *data, int64_t *timestamp) {
 
 /**
  *  @brief  This function will return the current delay for this sensor.
- *  @return delay in nanoseconds.
+ *  @return delay in nanoseconds. 
  */
-int64_t CompassSensor::getDelay(int32_t handle)
+int64_t CompassSensor::getDelay(int32_t /*handle*/)
 {
     VFUNC_LOG;
     return mDelay;
@@ -562,8 +563,7 @@ int CompassSensor::inv_init_sysfs_attributes(void)
     VFUNC_LOG;
 
     unsigned char i = 0;
-    char sysfs_path[MAX_SYSFS_NAME_LEN],
-         iio_trigger_path[MAX_SYSFS_NAME_LEN], tbuf[2];
+    char sysfs_path[MAX_SYSFS_NAME_LEN], iio_trigger_path[MAX_SYSFS_NAME_LEN], tbuf[2];
     char *sptr;
     char **dptr;
     int num;
@@ -628,4 +628,3 @@ int CompassSensor::inv_init_sysfs_attributes(void)
 #endif
     return 0;
 }
-
