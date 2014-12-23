@@ -47,6 +47,10 @@ PRODUCT_PACKAGES += \
     libmllite \
     libmplmpu \
 
+# Rootfs
+PRODUCT_COPY_FILES += \
+    $(BOWSER_COMMON_FOLDER)/init.bowser-common.rc:/root/init.bowser-common.rc
+
 # Permissions
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
