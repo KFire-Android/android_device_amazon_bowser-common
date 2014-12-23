@@ -60,14 +60,9 @@
 /* The SENSORS Module */
 #define LOCAL_SENSORS 1
 static struct sensor_t sSensorList[LOCAL_SENSORS + MPLSensor::numSensors] = {
-      { "MAX44007 Light sensor",
-          "Maxim",
-          1, SENSORS_LIGHT_HANDLE,
-          SENSOR_TYPE_LIGHT,
-          10000.0f,
-	  1.0f,
-	  0.5f,
-	  0, 0, 0, { } },
+	{"MAX44007 Light sensor", "Maxim", 1,
+	 SENSORS_LIGHT_HANDLE,
+	 SENSOR_TYPE_LIGHT, 10000.0f, 1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, { }},
 };
 static int numSensors = LOCAL_SENSORS;
 
