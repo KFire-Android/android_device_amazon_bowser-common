@@ -7,10 +7,9 @@ DEVICE_PACKAGE_OVERLAYS += $(BOWSER_COMMON_FOLDER)/overlay/aosp
 
 # Hardware HALs
 PRODUCT_PACKAGES += \
-    hwcomposer.bowser \
     lights.bowser \
     power.bowser \
-    camera.bowser \
+    camera.omap4 \
     audio.primary.bowser \
     audio.hdmi.bowser \
     audio.r_submix.default
