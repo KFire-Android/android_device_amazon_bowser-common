@@ -16,7 +16,7 @@ PRODUCT_PACKAGES += \
     audio.r_submix.default
 
 # Device settings
-PRODUCT_PROPERTY_OVERRIDES += \
+ADDITIONAL_BUILD_PROPERTIES += \
     persist.demo.hdmirotationlock=true \
     persist.lab126.touchnoisereject=1 \
     ro.nf.profile=2 \
@@ -27,7 +27,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.camera.video_size=1280x720
 
 # Dalvik VM settings
-PRODUCT_PROPERTY_OVERRIDES += \
+ADDITIONAL_BUILD_PROPERTIES += \
     dalvik.vm.heapstartsize=8m \
     dalvik.vm.heapgrowthlimit=128m \
     dalvik.vm.heapsize=384m \
