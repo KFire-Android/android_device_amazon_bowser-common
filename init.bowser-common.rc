@@ -74,9 +74,6 @@ on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
     chown media_rw media_rw /data/media
 
-    # mount system ro
-    mount ext4 /dev/block/platform/omap/omap_hsmmc.1/by-name/system /system ro remount
-
     # camera calibration - DCC folder permission
     mkdir /data/misc/camera 0700 media media
     mkdir /data/misc/camera/R01_MVEN002_LD0_ND0_IR0_SH0_FL0_SVEN002_DCCID46 0700 media media
