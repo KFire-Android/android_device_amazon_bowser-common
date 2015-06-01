@@ -25,15 +25,6 @@ ADDITIONAL_BUILD_PROPERTIES += \
     ro.camera.sound.forced=0 \
     ro.camera.video_size=1280x720
 
-# Dalvik VM settings
-ADDITIONAL_BUILD_PROPERTIES += \
-    dalvik.vm.heapstartsize=8m \
-    dalvik.vm.heapgrowthlimit=128m \
-    dalvik.vm.heapsize=384m \
-    dalvik.vm.heaptargetutilization=0.75 \
-    dalvik.vm.heapminfree=2m \
-    dalvik.vm.heapmaxfree=8m
-
 # BT
 PRODUCT_PACKAGES += \
     uim-sysfs \
@@ -70,4 +61,5 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(BOWSER_COMMON_FOLDER)/bluetooth/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf
 
+$(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
 $(call inherit-product-if-exists, vendor/amazon/bowser-common/bowser-common-vendor.mk)
