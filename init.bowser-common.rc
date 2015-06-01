@@ -65,6 +65,9 @@ on post-fs
     chown system system /dev/hdcp
     chmod 0666 /dev/hdcp
 
+    # reset SElinux context on /efs (incase of upgrade)
+    restorecon_recursive /efs
+
     # change permissions for Bluetooth/GPS
     chmod 0660 /sys/class/rfkill/rfkill0/state
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
