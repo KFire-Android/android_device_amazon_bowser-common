@@ -12,6 +12,7 @@ PRODUCT_PACKAGES += \
     camera.omap4 \
     audio.primary.bowser \
     audio.hdmi.bowser \
+    audio.a2dp.default
 
 # Device settings
 ADDITIONAL_BUILD_PROPERTIES += \
