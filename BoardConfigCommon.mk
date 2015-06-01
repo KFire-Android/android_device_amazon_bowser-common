@@ -54,6 +54,7 @@ BOARD_CREATE_AMAZON_HDCP_KEYS_SYMLINK := true
 
 # Recovery
 TARGET_RECOVERY_PRE_COMMAND := "echo 0 > /sys/block/mmcblk0boot0/force_ro; echo -n 7 | dd of=/dev/block/mmcblk0boot0 bs=1 count=1 seek=4104 ; sync; \#"
+BOARD_CANT_BUILD_RECOVERY_FROM_BOOT_PATCH := true
 
 # TWRP Config
 TW_INTERNAL_STORAGE_PATH := "/data/media/0"
