@@ -12,7 +12,6 @@ PRODUCT_PACKAGES += \
     camera.omap4 \
     audio.primary.bowser \
     audio.hdmi.bowser \
-    audio.r_submix.default
 
 # Device settings
 ADDITIONAL_BUILD_PROPERTIES += \
