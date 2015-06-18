@@ -70,8 +70,8 @@ on post-fs
 
     # change permissions for Bluetooth/GPS
     chmod 0660 /sys/class/rfkill/rfkill0/state
-    chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
-    chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
+    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
+    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
     chmod 0600 /dev/ttyO1
     chown bluetooth bluetooth /dev/ttyO1
     chmod 0666 /dev/rfkill
